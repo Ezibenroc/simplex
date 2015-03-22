@@ -80,8 +80,15 @@ class Parser:
             if(len(bound) != 1 or bound[0] != content[1].strip()):
                 raise Exception('Syntax error at line %s: invalid bound.' % lineno)
             self.linearProgram.tableaux[constraintID, self.linearProgram.nbVariables+constraintID] = 1
-            self.linearProgram.tableaux[constraintID, -1] = Fraction(bound[0])
-        return constraintID+2 if op == self.EQUAL else constraintID+1
+            if op[0] == self.LESS:
+                self.linearProgram.tableaux[constraintID, -1] = Fraction(bound[0])
+            elif op[0] == self.GREATER:
+                self.linearProgram.tableaux[constraintID, -1] = -Fraction(bound[0])
+            else: # self.EQUAL
+                self.linearProgram.tableaux[constraintID+1, self.linearProgram.nbVariables+constraintID+1] = 1
+                self.linearProgram.tableaux[constraintID, -1] = Fraction(bound[0])
+                self.linearProgram.tableaux[constraintID+1, -1] = -Fraction(bound[0])
+        return constraintID+2 if op == [self.EQUAL] else constraintID+1
 
     def fillTableaux(self):
         mode = None
