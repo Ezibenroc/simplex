@@ -6,6 +6,7 @@ class LinearProgram:
     def __init__(self):
         self.nbVariables = 0
         self.nbConstraints = 0
+        self.objective = 1
         self.tableaux = None
         self.variableFromIndex = {}
         self.indexFromVariable = {}
@@ -16,3 +17,6 @@ if __name__ == '__main__':
     parser.parse()
     print(lp.variableFromIndex)
     print(lp.indexFromVariable)
+    print(lp.nbVariables)
+    print(lp.nbConstraints)
+    print(lp.tableaux)
