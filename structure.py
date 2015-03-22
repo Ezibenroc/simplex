@@ -6,10 +6,13 @@ class LinearProgram:
     def __init__(self):
         self.nbVariables = 0
         self.nbConstraints = 0
-        self.objective = 1
+        self.objective = None
         self.tableaux = None
         self.variableFromIndex = {}
         self.indexFromVariable = {}
+
+    def __str__(self):
+        return '\n'.join(' '.join(str(y) for y in x) for x in self.tableaux.tolist())
 
 if __name__ == '__main__':
     lp = LinearProgram()
@@ -19,4 +22,4 @@ if __name__ == '__main__':
     print(lp.indexFromVariable)
     print(lp.nbVariables)
     print(lp.nbConstraints)
-    print(lp.tableaux)
+    print(lp)
