@@ -12,7 +12,7 @@ class LinearProgram:
         self.indexFromVariable = {}
 
     def __str__(self):
-        return '\n'.join(' '.join(str(y) for y in x) for x in self.tableaux.tolist())
+        return '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
 
 if __name__ == '__main__':
     lp = LinearProgram()
