@@ -9,9 +9,9 @@ class Parser:
     VARIABLES = 'VARIABLES'
     VAR = '[a-zA-Z_][a-zA-Z0-9_]*'
     VAR_REGEXP = re.compile(VAR)
-    NUMBER = '([\+-][ ]*)?(\d+/\d+|\d+)'
+    NUMBER = '([\+-][ ]*)?(\d+/\d+|\d+)?'
     NUMBER_REGEXP = re.compile(NUMBER)
-    LIT = '(%s)?( )*%s' % (NUMBER, VAR)
+    LIT = '(%s)( )*%s' % (NUMBER, VAR)
     LIT_REGEXP = re.compile(LIT)
     LESS = '<='
     GREATER = '>='
@@ -76,18 +76,50 @@ class Parser:
         elif not objective and len(op) != 1:
             raise Exception('Syntax error at line %s: one and only one comparison operator is allowed in constraints.' % lineno)
         if len(op) == 1 :
-            bound = [''.join(x) for x in self.NUMBER_REGEXP.findall(content[1])]
-            if(len(bound) != 1 or bound[0] != content[1].strip()):
+            bound = content[1].strip()
+            bound_match = self.NUMBER_REGEXP.match(bound)
+            if not bound_match or bound_match.end() != len(bound):
                 raise Exception('Syntax error at line %s: invalid bound.' % lineno)
+            bound = Fraction(bound)
             self.linearProgram.tableaux[constraintID, self.linearProgram.nbVariables+constraintID] = 1
             if op[0] == self.LESS:
-                self.linearProgram.tableaux[constraintID, -1] = Fraction(bound[0])
+                self.linearProgram.tableaux[constraintID, -1] = bound
             elif op[0] == self.GREATER:
-                self.linearProgram.tableaux[constraintID, -1] = -Fraction(bound[0])
+                self.linearProgram.tableaux[constraintID, -1] = -bound
             else: # self.EQUAL
                 self.linearProgram.tableaux[constraintID+1, self.linearProgram.nbVariables+constraintID+1] = 1
-                self.linearProgram.tableaux[constraintID, -1] = Fraction(bound[0])
-                self.linearProgram.tableaux[constraintID+1, -1] = -Fraction(bound[0])
+                self.linearProgram.tableaux[constraintID, -1] = bound
+                self.linearProgram.tableaux[constraintID+1, -1] = -bound
+        expression = content[0].replace(" ", "")
+        if expression == "":
+            raise Exception('Syntax error at line %s: empty expression.' % lineno)
+        while expression != "":
+            literalMatch = self.LIT_REGEXP.match(expression)
+            if not literalMatch:
+                raise Exception('Syntax error at line %s: invalid sub-expression: %s.' % (lineno, expression))
+            literal = expression[literalMatch.start():literalMatch.end()]
+            expression = expression[literalMatch.end():].strip()
+            number_match = self.NUMBER_REGEXP.match(literal)
+            number_string = literal[number_match.start():number_match.end()]
+            if number_string in {'+', ''}:
+                number = Fraction(1)
+            elif number_string == '-':
+                number = Fraction(-1)
+            else:
+                number = Fraction(number_string)
+            variable = literal[number_match.end():].strip()
+            print(number, variable)
+            try:
+                variable = self.linearProgram.indexFromVariable[variable]
+            except KeyError:
+                raise Exception('Syntax error at line %s: unknown variable: %s.' % (lineno, variable))
+            if len(op) == 0 or op[0] == self.LESS:
+                self.linearProgram.tableaux[constraintID, variable] = number
+            elif op[0] == self.GREATER:
+                self.linearProgram.tableaux[constraintID, variable] = -number
+            else: # self.EQUAL
+                self.linearProgram.tableaux[constraintID, variable] = number
+                self.linearProgram.tableaux[constraintID+1, variable] = -number
         return constraintID+2 if op == [self.EQUAL] else constraintID+1
 
     def fillTableaux(self):
