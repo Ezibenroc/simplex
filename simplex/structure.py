@@ -14,7 +14,7 @@ class LinearProgram:
         if not tableaux is None:
             self.tableaux = np.matrix(tableaux)
             self.nbConstraints = len(self.tableaux.A) - 1
-            self.nbVariables = len(self.tableaux.A[0]) - self.nbConstraints - 2
+            self.nbVariables = len(self.tableaux.A[0]) - self.nbConstraints - 1
         else:
             self.tableaux = None
             self.nbVariables = 0
@@ -28,7 +28,7 @@ class LinearProgram:
 
     def chosePivot(self):
         column = self.tableaux[0].argmax()
-        if column == 0 or self.tableaux[0, column] < 0:
+        if column == len(self.tableaux.A[0]) -1 or self.tableaux[0, column] <= 0:
             raise EndOfAlgorithm
         row = None
         for r in range(1, self.nbConstraints):
@@ -38,7 +38,7 @@ class LinearProgram:
                 elif -self.tableaux[r, -1]/self.tableaux[r, column] < -self.tableaux[row, -1]/self.tableaux[row, column]:
                     row = r
         if row is None:
-            raise Unbounded
+            raise Unbounded('Variable %d' % column)
         return row, column
 
 if __name__ == '__main__':

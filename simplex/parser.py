@@ -38,7 +38,7 @@ class Parser:
                     yield (lineno, content)
 
     def fillVariables(self):
-        varIndex = 1
+        varIndex = 0
         mode = None
         for (lineno, content) in self.lineRange():
             if content in [self.VARIABLES, self.SUBJECT_TO, self.BOUNDS]+[x for x in self.OBJECTIVE]:
@@ -65,7 +65,7 @@ class Parser:
                 continue
             else:
                 raise Exception('Syntax error at line %s.' % lineno)
-        self.linearProgram.tableaux = numpy.matrix([[Fraction(0, 1)]*(self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 2)\
+        self.linearProgram.tableaux = numpy.matrix([[Fraction(0, 1)]*(self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 1)\
             for i in range(self.linearProgram.nbConstraints + 1)])
 
     def newExpression(self, lineno, constraintID, content, objective):
@@ -81,13 +81,13 @@ class Parser:
             if not bound_match or bound_match.end() != len(bound):
                 raise Exception('Syntax error at line %s: invalid bound.' % lineno)
             bound = Fraction(bound)
-            self.linearProgram.tableaux[constraintID, self.linearProgram.nbVariables+constraintID] = 1
+            self.linearProgram.tableaux[constraintID, self.linearProgram.nbVariables+constraintID-1] = 1
             if op[0] == self.LESS:
                 self.linearProgram.tableaux[constraintID, -1] = bound
             elif op[0] == self.GREATER:
                 self.linearProgram.tableaux[constraintID, -1] = -bound
             else: # self.EQUAL
-                self.linearProgram.tableaux[constraintID+1, self.linearProgram.nbVariables+constraintID+1] = 1
+                self.linearProgram.tableaux[constraintID+1, self.linearProgram.nbVariables+constraintID] = 1
                 self.linearProgram.tableaux[constraintID, -1] = bound
                 self.linearProgram.tableaux[constraintID+1, -1] = -bound
         expression = content[0].replace(" ", "")
