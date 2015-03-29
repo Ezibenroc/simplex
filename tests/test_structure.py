@@ -4,7 +4,7 @@ from unittest import TestCase
 import numpy as np
 from fractions import Fraction as F
 
-testMatrix = np.matrix([
+testMatrix1 = np.matrix([
     [F(-3), F(2), F(-2), F(-4), F(0), F(0), F(0)],
     [F(4), F(-2), F(1), F(-1), F(1), F(0), F(-2)],
     [F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
@@ -13,12 +13,12 @@ testMatrix = np.matrix([
 class StructureTests(TestCase):
 
     def testConstructor(self):
-        lp = LinearProgram(testMatrix)
+        lp = LinearProgram(testMatrix1)
         self.assertEqual(lp.nbConstraints, 2)
         self.assertEqual(lp.nbVariables, 4)
 
     def testChosePivot(self):
-        lp = LinearProgram(testMatrix)
+        lp = LinearProgram(testMatrix1)
         row, column = lp.chosePivot()
         self.assertEqual(column, 1)
         self.assertEqual(row, 1)
@@ -31,7 +31,7 @@ class StructureTests(TestCase):
             row, column = lp.chosePivot()
 
     def testPerformPivot(self):
-        lp = LinearProgram(testMatrix)
+        lp = LinearProgram(testMatrix1)
         row, column = 1, 1
         lp.performPivot(row, column)
         expected = np.matrix([
