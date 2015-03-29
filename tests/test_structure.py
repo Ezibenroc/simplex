@@ -16,3 +16,16 @@ class StructureTests(TestCase):
         lp = LinearProgram(testMatrix)
         self.assertEqual(lp.nbConstraints, 2)
         self.assertEqual(lp.nbVariables, 4)
+
+    def testPivot(self):
+        lp = LinearProgram(testMatrix)
+        row, column = lp.chosePivot()
+        self.assertEqual(column, 2)
+        self.assertEqual(row, 1)
+        lp.tableaux[0, 2] = F(-1)
+        with self.assertRaises(EndOfAlgorithm):
+            row, column = lp.chosePivot()
+        lp.tableaux[0, 2] = F(2)
+        lp.tableaux[1, 2] = F(2)
+        with self.assertRaises(Unbounded):
+            row, column = lp.chosePivot()
