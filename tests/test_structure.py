@@ -17,7 +17,7 @@ class StructureTests(TestCase):
         self.assertEqual(lp.nbConstraints, 2)
         self.assertEqual(lp.nbVariables, 4)
 
-    def testPivot(self):
+    def testChosePivot(self):
         lp = LinearProgram(testMatrix)
         row, column = lp.chosePivot()
         self.assertEqual(column, 1)
@@ -29,3 +29,15 @@ class StructureTests(TestCase):
         lp.tableaux[1, 1] = F(2)
         with self.assertRaises(Unbounded):
             row, column = lp.chosePivot()
+
+    def testPerformPivot(self):
+        lp = LinearProgram(testMatrix)
+        row, column = 1, 1
+        lp.performPivot(row, column)
+        expected = np.matrix([
+            [F(1), F(0), F(-1), F(-5), F(1), F(0), F(-2)],
+            [F(-2), F(1), F(-1, 2), F(1, 2), F(-1, 2), F(0), F(1)],
+            [F(1), F(0), F(-1, 2), F(-1, 2), F(1, 2), F(1), F(-11)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)

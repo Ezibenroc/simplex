@@ -41,6 +41,14 @@ class LinearProgram:
             raise Unbounded('Variable %d' % column)
         return row, column
 
+    def performPivot(self, row, column):
+        self.tableaux[row]/=self.tableaux[row, column]
+        for r in range(len(self.tableaux)):
+            if r != row:
+                coeff = self.tableaux[r, column]
+                for c in range(len(self.tableaux.A[0])):
+                    self.tableaux[r, c] -= coeff*self.tableaux[row, c]
+
 if __name__ == '__main__':
     lp = LinearProgram()
     parser = Parser(lp, 'example.in')
