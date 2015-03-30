@@ -67,6 +67,7 @@ class Parser:
                 raise Exception('Syntax error at line %s.' % lineno)
         self.linearProgram.tableaux = numpy.array([[Fraction(0, 1)]*(self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 1)\
             for i in range(self.linearProgram.nbConstraints + 1)])
+        self.linearProgram.basicVariables += list(range(self.linearProgram.nbVariables, self.linearProgram.nbVariables+self.linearProgram.nbConstraints))
 
     def newExpression(self, lineno, constraintID, content, objective):
         op = self.COMP_EQ_REGEXP.findall(content)
