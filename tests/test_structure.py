@@ -23,9 +23,11 @@ class StructureTests(TestCase):
         lp = LinearProgram(testMatrix1)
         self.assertEqual(lp.nbConstraints, 2)
         self.assertEqual(lp.nbVariables, 4)
+        self.assertEqual(lp.basicVariables[1:], [4, 5])
         lp = LinearProgram(testMatrix2)
         self.assertEqual(lp.nbConstraints, 3)
         self.assertEqual(lp.nbVariables, 3)
+        self.assertEqual(lp.basicVariables[1:], [3, 4, 5])
 
     def testChosePivot(self):
         lp = LinearProgram(testMatrix2)
@@ -55,6 +57,7 @@ class StructureTests(TestCase):
         ])
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+        self.assertEqual(lp.basicVariables[1:], [0, 4, 5])
         row, column = lp.chosePivot()
         self.assertEqual((row, column), (3, 2))
         lp.performPivot(row, column)
@@ -66,8 +69,7 @@ class StructureTests(TestCase):
         ])
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
-
-
+        self.assertEqual(lp.basicVariables[1:], [0, 4, 2])
 
     def testSimplex(self):
         lp = LinearProgram(testMatrix2)
@@ -81,3 +83,4 @@ class StructureTests(TestCase):
         ])
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+        self.assertEqual(lp.basicVariables[1:], [0, 4, 2])

@@ -15,10 +15,12 @@ class LinearProgram:
             self.tableaux = np.matrix(tableaux)
             self.nbConstraints = len(self.tableaux.A) - 1
             self.nbVariables = len(self.tableaux.A[0]) - self.nbConstraints - 1
+            self.basicVariables = [None]+list(range(self.nbVariables, self.nbVariables+self.nbConstraints))
         else:
             self.tableaux = None
             self.nbVariables = 0
             self.nbConstraints = 0
+            self.basicVariables = [None]
         self.objective = None
         self.variableFromIndex = {}
         self.indexFromVariable = {}
@@ -42,6 +44,7 @@ class LinearProgram:
         return row, column
 
     def performPivot(self, row, column):
+        self.basicVariables[row] = column
         self.tableaux[row]/=self.tableaux[row, column]
         for r in range(len(self.tableaux)):
             if r != row:
