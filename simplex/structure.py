@@ -27,15 +27,15 @@ class LinearProgram:
         return '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
 
     def chosePivot(self):
-        column = self.tableaux[0].argmax()
-        if column == len(self.tableaux.A[0]) -1 or self.tableaux[0, column] <= 0:
+        column = self.tableaux[0].argmin()
+        if column == len(self.tableaux.A[0]) -1 or self.tableaux[0, column] >= 0:
             raise EndOfAlgorithm
         row = None
-        for r in range(1, self.nbConstraints):
-            if self.tableaux[r, column] < 0:
+        for r in range(1, len(self.tableaux)):
+            if self.tableaux[r, column] > 0:
                 if row is None:
                     row = r
-                elif -self.tableaux[r, -1]/self.tableaux[r, column] < -self.tableaux[row, -1]/self.tableaux[row, column]:
+                elif self.tableaux[r, -1]/self.tableaux[r, column] < self.tableaux[row, -1]/self.tableaux[row, column]:
                     row = r
         if row is None:
             raise Unbounded('Variable %d' % column)
@@ -48,6 +48,15 @@ class LinearProgram:
                 coeff = self.tableaux[r, column]
                 for c in range(len(self.tableaux.A[0])):
                     self.tableaux[r, c] -= coeff*self.tableaux[row, c]
+
+    def runSimplex(self):
+        while(True):
+            try:
+                row, column = self.chosePivot()
+            except EndOfAlgorithm:
+                break
+            self.performPivot(row, column)
+        return self.tableaux[0, -1]
 
 if __name__ == '__main__':
     lp = LinearProgram()
