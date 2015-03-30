@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 from simplex import LinearProgram, Parser
 
 if __name__ == '__main__':
