@@ -113,10 +113,10 @@ class Parser:
                 variable = self.linearProgram.indexFromVariable[variable]
             except KeyError:
                 raise Exception('Syntax error at line %s: unknown variable: %s.' % (lineno, variable))
-            if len(op) == 0 or op[0] == self.LESS:
-                self.linearProgram.tableaux[constraintID, variable] = number
-            elif op[0] == self.GREATER:
+            if len(op) == 0 or op[0] == self.GREATER:
                 self.linearProgram.tableaux[constraintID, variable] = -number
+            elif op[0] == self.LESS:
+                self.linearProgram.tableaux[constraintID, variable] = number
             else: # self.EQUAL
                 self.linearProgram.tableaux[constraintID, variable] = number
                 self.linearProgram.tableaux[constraintID+1, variable] = -number
