@@ -57,14 +57,3 @@ class LinearProgram:
                 break
             self.performPivot(row, column)
         return self.tableaux[0, -1]
-
-if __name__ == '__main__':
-    lp = LinearProgram()
-    parser = Parser(lp, 'example.in')
-    parser.parse()
-    print(lp.variableFromIndex)
-    print(lp.indexFromVariable)
-    print(lp.nbVariables)
-    print(lp.nbConstraints)
-    print(lp)
-    print(lp.chosePivot())

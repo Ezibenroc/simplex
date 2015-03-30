@@ -108,7 +108,6 @@ class Parser:
             else:
                 number = Fraction(number_string)
             variable = literal[number_match.end():].strip()
-            print(number, variable)
             try:
                 variable = self.linearProgram.indexFromVariable[variable]
             except KeyError:
