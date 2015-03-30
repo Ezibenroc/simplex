@@ -65,7 +65,7 @@ class Parser:
                 continue
             else:
                 raise Exception('Syntax error at line %s.' % lineno)
-        self.linearProgram.tableaux = numpy.matrix([[Fraction(0, 1)]*(self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 1)\
+        self.linearProgram.tableaux = numpy.array([[Fraction(0, 1)]*(self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 1)\
             for i in range(self.linearProgram.nbConstraints + 1)])
 
     def newExpression(self, lineno, constraintID, content, objective):
@@ -83,12 +83,12 @@ class Parser:
             bound = Fraction(bound)
             self.linearProgram.tableaux[constraintID, self.linearProgram.nbVariables+constraintID-1] = 1
             if op[0] == self.LESS:
-                self.linearProgram.tableaux[constraintID, -1] = bound
+                self.linearProgram.tableaux[constraintID][-1] = bound
             elif op[0] == self.GREATER:
-                self.linearProgram.tableaux[constraintID, -1] = -bound
+                self.linearProgram.tableaux[constraintID][-1] = -bound
             else: # self.EQUAL
                 self.linearProgram.tableaux[constraintID+1, self.linearProgram.nbVariables+constraintID] = 1
-                self.linearProgram.tableaux[constraintID, -1] = bound
+                self.linearProgram.tableaux[constraintID][-1] = bound
                 self.linearProgram.tableaux[constraintID+1, -1] = -bound
         expression = content[0].replace(" ", "")
         if expression == "":
@@ -113,11 +113,11 @@ class Parser:
             except KeyError:
                 raise Exception('Syntax error at line %s: unknown variable: %s.' % (lineno, variable))
             if len(op) == 0 or op[0] == self.GREATER:
-                self.linearProgram.tableaux[constraintID, variable] = -number
+                self.linearProgram.tableaux[constraintID][variable] = -number
             elif op[0] == self.LESS:
-                self.linearProgram.tableaux[constraintID, variable] = number
+                self.linearProgram.tableaux[constraintID][variable] = number
             else: # self.EQUAL
-                self.linearProgram.tableaux[constraintID, variable] = number
+                self.linearProgram.tableaux[constraintID][variable] = number
                 self.linearProgram.tableaux[constraintID+1, variable] = -number
         return constraintID+2 if op == [self.EQUAL] else constraintID+1
 

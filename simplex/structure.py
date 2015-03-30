@@ -8,13 +8,16 @@ class EndOfAlgorithm(Exception):
 class Unbounded(Exception):
     pass
 
+class Empty(Exception):
+    pass
+
 class LinearProgram:
 
     def __init__(self, tableaux = None):
         if not tableaux is None:
-            self.tableaux = np.matrix(tableaux)
-            self.nbConstraints = len(self.tableaux.A) - 1
-            self.nbVariables = len(self.tableaux.A[0]) - self.nbConstraints - 1
+            self.tableaux = np.array(tableaux)
+            self.nbConstraints = len(self.tableaux) - 1
+            self.nbVariables = len(self.tableaux[0]) - self.nbConstraints - 1
             self.basicVariables = [None]+list(range(self.nbVariables, self.nbVariables+self.nbConstraints))
         else:
             self.tableaux = None
@@ -30,14 +33,14 @@ class LinearProgram:
 
     def chosePivot(self):
         column = self.tableaux[0].argmin()
-        if column == len(self.tableaux.A[0]) -1 or self.tableaux[0, column] >= 0:
+        if column == len(self.tableaux[0]) -1 or self.tableaux[0][column] >= 0:
             raise EndOfAlgorithm
         row = None
         for r in range(1, len(self.tableaux)):
             if self.tableaux[r, column] > 0:
                 if row is None:
                     row = r
-                elif self.tableaux[r, -1]/self.tableaux[r, column] < self.tableaux[row, -1]/self.tableaux[row, column]:
+                elif self.tableaux[r][-1]/self.tableaux[r][column] < self.tableaux[row][-1]/self.tableaux[row][column]:
                     row = r
         if row is None:
             raise Unbounded('Variable %d' % column)
@@ -45,12 +48,12 @@ class LinearProgram:
 
     def performPivot(self, row, column):
         self.basicVariables[row] = column
-        self.tableaux[row]/=self.tableaux[row, column]
+        self.tableaux[row]/=self.tableaux[row][column]
         for r in range(len(self.tableaux)):
             if r != row:
-                coeff = self.tableaux[r, column]
-                for c in range(len(self.tableaux.A[0])):
-                    self.tableaux[r, c] -= coeff*self.tableaux[row, c]
+                coeff = self.tableaux[r][column]
+                for c in range(len(self.tableaux[0])):
+                    self.tableaux[r][c] -= coeff*self.tableaux[row][c]
 
     def runSimplex(self):
         while(True):
@@ -59,4 +62,4 @@ class LinearProgram:
             except EndOfAlgorithm:
                 break
             self.performPivot(row, column)
-        return self.tableaux[0, -1]
+        return self.tableaux[0][-1]

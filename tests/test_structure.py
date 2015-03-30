@@ -4,13 +4,13 @@ from unittest import TestCase
 import numpy as np
 from fractions import Fraction as F
 
-testMatrix1 = np.matrix([
+testMatrix1 = np.array([
     [F(-3), F(2), F(-2), F(-1), F(0), F(0), F(0)],
     [F(4), F(-2), F(1), F(-1), F(1), F(0), F(-2)],
     [F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
 ])
 
-testMatrix2 = np.matrix([
+testMatrix2 = np.array([
     [F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
     [F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
     [F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
@@ -35,12 +35,12 @@ class StructureTests(TestCase):
         self.assertEqual(column, 0)
         self.assertEqual(row, 1)
         for i in range(3):
-            lp.tableaux[0, i] = F(1)
+            lp.tableaux[0][i] = F(1)
         with self.assertRaises(EndOfAlgorithm):
             row, column = lp.chosePivot()
-        lp.tableaux[0, 0] = F(-1)
+        lp.tableaux[0][0] = F(-1)
         for i in range(1, 4):
-            lp.tableaux[i, 0] = F(-1)
+            lp.tableaux[i][0] = F(-1)
         with self.assertRaises(Unbounded):
             row, column = lp.chosePivot()
 
@@ -49,7 +49,7 @@ class StructureTests(TestCase):
         row, column = lp.chosePivot()
         self.assertEqual((row, column), (1, 0))
         lp.performPivot(row, column)
-        expected = np.matrix([
+        expected = np.array([
             [F(0), F(7, 2), F(-1, 2), F(5, 2), F(0), F(0), F(25, 2)],
             [F(1), F(3, 2), F(1, 2), F(1, 2), F(0), F(0), F(5, 2)],
             [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
@@ -61,7 +61,7 @@ class StructureTests(TestCase):
         row, column = lp.chosePivot()
         self.assertEqual((row, column), (3, 2))
         lp.performPivot(row, column)
-        expected = np.matrix([
+        expected = np.array([
             [F(0), F(3), F(0), F(1), F(0), F(1), F(13)],
             [F(1), F(2), F(0), F(2), F(0), F(-1), F(2)],
             [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
@@ -75,7 +75,7 @@ class StructureTests(TestCase):
         lp = LinearProgram(testMatrix2)
         obj = lp.runSimplex()
         self.assertEqual(obj, 13)
-        expected = np.matrix([
+        expected = np.array([
             [F(0), F(3), F(0), F(1), F(0), F(1), F(13)],
             [F(1), F(2), F(0), F(2), F(0), F(-1), F(2)],
             [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
