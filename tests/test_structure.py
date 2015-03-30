@@ -44,7 +44,8 @@ class StructureTests(TestCase):
 
     def testPerformPivot(self):
         lp = LinearProgram(testMatrix2)
-        row, column = 1, 0
+        row, column = lp.chosePivot()
+        self.assertEqual((row, column), (1, 0))
         lp.performPivot(row, column)
         expected = np.matrix([
             [F(0), F(7, 2), F(-1, 2), F(5, 2), F(0), F(0), F(25, 2)],
@@ -54,8 +55,29 @@ class StructureTests(TestCase):
         ])
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+        row, column = lp.chosePivot()
+        self.assertEqual((row, column), (3, 2))
+        lp.performPivot(row, column)
+        expected = np.matrix([
+            [F(0), F(3), F(0), F(1), F(0), F(1), F(13)],
+            [F(1), F(2), F(0), F(2), F(0), F(-1), F(2)],
+            [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
+            [F(0), F(-1), F(1), F(-3), F(0), F(2), F(1)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+
+
 
     def testSimplex(self):
         lp = LinearProgram(testMatrix2)
         obj = lp.runSimplex()
         self.assertEqual(obj, 13)
+        expected = np.matrix([
+            [F(0), F(3), F(0), F(1), F(0), F(1), F(13)],
+            [F(1), F(2), F(0), F(2), F(0), F(-1), F(2)],
+            [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
+            [F(0), F(-1), F(1), F(-3), F(0), F(2), F(1)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
