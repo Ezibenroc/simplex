@@ -155,3 +155,5 @@ class StructureTests(TestCase):
     def testSolve(self):
         lp = LinearProgram(testMatrix1)
         self.assertEqual(lp.solve(), -20)
+        # lp = LinearProgram(testMatrix2)
+        # self.assertEqual(lp.solve(), 13)

@@ -55,13 +55,20 @@ class LinearProgram:
                 for c in range(len(self.tableaux[0])):
                     self.tableaux[r][c] -= coeff*self.tableaux[row][c]
 
-    def runSimplex(self):
+    def runSimplex(self, verbose = False):
+        if verbose:
+            print(self, "\n")
         while(True):
             try:
                 row, column = self.chosePivot()
             except EndOfAlgorithm:
                 break
+            if verbose:
+                print('Entering variable: %s' % self.variableFromIndex[column])
+                print('Leaving variable: %s' % self.variableFromIndex[self.basicVariables[row]])
             self.performPivot(row, column)
+            if verbose:
+                print(self, "\n")
         return self.tableaux[0][-1]
 
     def addVariable(self):
@@ -69,11 +76,13 @@ class LinearProgram:
         self.tableaux[0][0] = Fraction(1)
         self.basicVariables = [None] + [0]*self.nbConstraints
         self.nbVariables += 1
+        # TODO update self.variableFromIndex
 
     def removeVariable(self):
         self.tableaux = np.delete(self.tableaux, 0, 1)
         self.nbVariables -= 1
         self.basicVariables = [None]+[x-1 for x in self.basicVariables[1:]]
+        # TODO update self.variableFromIndex
 
     def firstPhaseLeavingVariable(self):
         imin = 1
