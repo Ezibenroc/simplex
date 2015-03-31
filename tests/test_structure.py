@@ -104,10 +104,6 @@ class StructureTests(TestCase):
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], testMatrix2[i], "(row %d)" % i)
 
-    def testFirstPhaseLeavingVariable(self):
-        lp = LinearProgram(testMatrix2FirstPhase)
-        self.assertEqual(lp.tableaux[lp.firstPhaseLeavingVariable()][-1], 5)
-
     def testSolve(self):
         lp = LinearProgram(testMatrix1)
         objective = list(lp.tableaux[0])

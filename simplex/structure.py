@@ -93,7 +93,7 @@ class LinearProgram:
         for i in range(2, len(self.tableaux)):
             if self.tableaux[i][-1] < self.tableaux[imin][-1]:
                 imin = i
-        return imin
+        return imin, self.tableaux[imin][-1]
 
     def updateObjective(self):
         for row, column in enumerate(self.basicVariables):
@@ -102,18 +102,20 @@ class LinearProgram:
             self.tableaux[0] -= self.tableaux[0][column]*self.tableaux[row]
 
     def solve(self, verbose = False):
-        objective = list(self.tableaux[0])
-        self.tableaux[0] = [0]*len(self.tableaux[0])
-        self.addVariable()
-        if verbose:
-            print("# FIRST PHASE\n")
-        self.performPivot(self.firstPhaseLeavingVariable(), 0, verbose)
-        if self.runSimplex(verbose) != 0:
-            raise Empty
-        self.removeVariable()
-        for i, col in enumerate(objective):
-            self.tableaux[0][i] = objective[i]
-        self.updateObjective()
+        firstPhaseVariable, constantValue = self.firstPhaseLeavingVariable()
+        if constantValue < 0:
+            objective = list(self.tableaux[0])
+            self.tableaux[0] = [0]*len(self.tableaux[0])
+            self.addVariable()
+            if verbose:
+                print("# FIRST PHASE\n")
+            self.performPivot(firstPhaseVariable, 0, verbose)
+            if self.runSimplex(verbose) != 0:
+                raise Empty
+            self.removeVariable()
+            for i, col in enumerate(objective):
+                self.tableaux[0][i] = objective[i]
+            self.updateObjective()
         if verbose:
             print("\n\n# SECOND PHASE\n")
         return self.runSimplex(verbose)
