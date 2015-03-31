@@ -66,18 +66,34 @@ class LinearProgram:
 
     def addVariable(self):
         self.tableaux = np.hstack(([[Fraction(1)] for i in range(len(self.tableaux))], self.tableaux))
+        self.basicVariables = [None] + [-1]*self.nbConstraints
         self.nbVariables += 1
 
     def removeVariable(self):
         self.tableaux = np.delete(self.tableaux, 0, 1)
         self.nbVariables -= 1
 
+    def firstPhaseLeavingVariable(self):
+        imin = 1
+        for i in range(2, len(self.tableaux)):
+            if self.tableaux[i][-1] < self.tableaux[imin][-1]:
+                imin = i
+        return i
+
+    def updateObjective(self):
+        for row, column in enumerate(self.basicVariables):
+            if column is None:
+                continue
+            self.tableaux[0] -= self.tableaux[0][column]*self.tableaux[row]
+
     def solve(self):
         objective = self.tableaux[0]
         self.tableaux[0] = [0]*len(self.tableaux[0])
         self.addVariable()
+        self.performPivot(self.firstPhaseLeavingVariable(), 0)
         if self.runSimplex() != 0:
             raise Empty
         self.removeVariable()
         self.tableaux[0] = objective # maybe we should modify the objective? (the basic variables might have changed)
+        self.updateObjective()
         return self.runSimplex()
