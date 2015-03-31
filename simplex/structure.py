@@ -63,3 +63,21 @@ class LinearProgram:
                 break
             self.performPivot(row, column)
         return self.tableaux[0][-1]
+
+    def addVariable(self):
+        self.tableaux = np.hstack(([[Fraction(1)] for i in range(len(self.tableaux))], self.tableaux))
+        self.nbVariables += 1
+
+    def removeVariable(self):
+        self.tableaux = np.delete(self.tableaux, 0, 1)
+        self.nbVariables -= 1
+
+    def solve(self):
+        objective = self.tableaux[0]
+        self.tableaux[0] = [0]*len(self.tableaux[0])
+        self.addVariable()
+        if self.runSimplex() != 0:
+            raise Empty
+        self.removeVariable()
+        self.tableaux[0] = objective # maybe we should modify the objective? (the basic variables might have changed)
+        return self.runSimplex()
