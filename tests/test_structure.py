@@ -111,7 +111,6 @@ class StructureTests(TestCase):
     def testSolve(self):
         lp = LinearProgram(testMatrix1)
         objective = list(lp.tableaux[0])
-        print("objective=", objective)
         lp.tableaux[0] = [0]*len(lp.tableaux[0])
         lp.addVariable()
         row = lp.firstPhaseLeavingVariable()
@@ -144,10 +143,15 @@ class StructureTests(TestCase):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
         lp.removeVariable()
         lp.tableaux[0] = objective
-        print(lp, "\n")
         lp.updateObjective()
-        print(lp)
+        expected = np.array([
+            [F(1), F(0), F(0), F(1), F(0), F(2), F(-20)],
+            [F(-2), F(0), F(1), F(1), F(-1), F(-2), F(22)],
+            [F(-3), F(1), F(0), F(1), F(-1), F(-1), F(12)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
 
-    # def testSolve(self):
-    #     lp = LinearProgram(testMatrix1)
-    #     self.assertEqual(lp.solve(), 20)
+    def testSolve(self):
+        lp = LinearProgram(testMatrix1)
+        self.assertEqual(lp.solve(), -20)

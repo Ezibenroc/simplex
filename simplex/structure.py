@@ -67,12 +67,13 @@ class LinearProgram:
     def addVariable(self):
         self.tableaux = np.hstack(([[Fraction(-1)] for i in range(len(self.tableaux))], self.tableaux))
         self.tableaux[0][0] = Fraction(1)
-        self.basicVariables = [None] + [-1]*self.nbConstraints
+        self.basicVariables = [None] + [0]*self.nbConstraints
         self.nbVariables += 1
 
     def removeVariable(self):
         self.tableaux = np.delete(self.tableaux, 0, 1)
         self.nbVariables -= 1
+        self.basicVariables = [None]+[x-1 for x in self.basicVariables[1:]]
 
     def firstPhaseLeavingVariable(self):
         imin = 1
