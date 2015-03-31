@@ -46,7 +46,10 @@ class LinearProgram:
             raise Unbounded('Variable %d' % column)
         return row, column
 
-    def performPivot(self, row, column):
+    def performPivot(self, row, column, verbose = False):
+        if verbose:
+            print('Entering variable: %s' % self.variableFromIndex[column])
+            print('Leaving variable: %s' % self.variableFromIndex[self.basicVariables[row]])
         self.basicVariables[row] = column
         self.tableaux[row]/=self.tableaux[row][column]
         for r in range(len(self.tableaux)):
@@ -54,6 +57,8 @@ class LinearProgram:
                 coeff = self.tableaux[r][column]
                 for c in range(len(self.tableaux[0])):
                     self.tableaux[r][c] -= coeff*self.tableaux[row][c]
+        if verbose:
+            print(self, "\n")
 
     def runSimplex(self, verbose = False):
         if verbose:
@@ -63,18 +68,13 @@ class LinearProgram:
                 row, column = self.chosePivot()
             except EndOfAlgorithm:
                 break
-            if verbose:
-                print('Entering variable: %s' % self.variableFromIndex[column])
-                print('Leaving variable: %s' % self.variableFromIndex[self.basicVariables[row]])
-            self.performPivot(row, column)
-            if verbose:
-                print(self, "\n")
+            self.performPivot(row, column, verbose)
         return self.tableaux[0][-1]
 
     def addVariable(self):
         self.tableaux = np.hstack(([[Fraction(-1)] for i in range(len(self.tableaux))], self.tableaux))
         self.tableaux[0][0] = Fraction(1)
-        self.basicVariables = [None] + [0]*self.nbConstraints
+        self.basicVariables = [None]+[x+1 for x in self.basicVariables[1:]]
         self.nbVariables += 1
         self.variableFromIndex = {i+1:var for i, var in self.variableFromIndex.items()}
         self.variableFromIndex[0] = '_phase1_'
@@ -101,15 +101,19 @@ class LinearProgram:
                 continue
             self.tableaux[0] -= self.tableaux[0][column]*self.tableaux[row]
 
-    def solve(self):
+    def solve(self, verbose = False):
         objective = list(self.tableaux[0])
         self.tableaux[0] = [0]*len(self.tableaux[0])
         self.addVariable()
-        self.performPivot(self.firstPhaseLeavingVariable(), 0)
-        if self.runSimplex() != 0:
+        if verbose:
+            print("# FIRST PHASE\n")
+        self.performPivot(self.firstPhaseLeavingVariable(), 0, verbose)
+        if self.runSimplex(verbose) != 0:
             raise Empty
         self.removeVariable()
         for i, col in enumerate(objective):
             self.tableaux[0][i] = objective[i]
         self.updateObjective()
-        return self.runSimplex()
+        if verbose:
+            print("\n\n# SECOND PHASE\n")
+        return self.runSimplex(verbose)
