@@ -32,7 +32,7 @@ class LinearProgram:
         return '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
 
     def chosePivot(self):
-        column = self.tableaux[0].argmin()
+        column = self.tableaux[0][:-1].argmin()
         if column == len(self.tableaux[0]) -1 or self.tableaux[0][column] >= 0:
             raise EndOfAlgorithm
         row = None
@@ -65,7 +65,8 @@ class LinearProgram:
         return self.tableaux[0][-1]
 
     def addVariable(self):
-        self.tableaux = np.hstack(([[Fraction(1)] for i in range(len(self.tableaux))], self.tableaux))
+        self.tableaux = np.hstack(([[Fraction(-1)] for i in range(len(self.tableaux))], self.tableaux))
+        self.tableaux[0][0] = Fraction(1)
         self.basicVariables = [None] + [-1]*self.nbConstraints
         self.nbVariables += 1
 
@@ -78,7 +79,7 @@ class LinearProgram:
         for i in range(2, len(self.tableaux)):
             if self.tableaux[i][-1] < self.tableaux[imin][-1]:
                 imin = i
-        return i
+        return imin
 
     def updateObjective(self):
         for row, column in enumerate(self.basicVariables):
@@ -87,13 +88,14 @@ class LinearProgram:
             self.tableaux[0] -= self.tableaux[0][column]*self.tableaux[row]
 
     def solve(self):
-        objective = self.tableaux[0]
+        objective = list(self.tableaux[0])
         self.tableaux[0] = [0]*len(self.tableaux[0])
         self.addVariable()
         self.performPivot(self.firstPhaseLeavingVariable(), 0)
         if self.runSimplex() != 0:
             raise Empty
         self.removeVariable()
-        self.tableaux[0] = objective # maybe we should modify the objective? (the basic variables might have changed)
+        for i, col in enumerate(objective):
+            self.tableaux[0][i] = objective[i]
         self.updateObjective()
         return self.runSimplex()

@@ -5,7 +5,7 @@ import numpy as np
 from fractions import Fraction as F
 
 testMatrix1 = np.array([
-    [F(-3), F(2), F(-2), F(-1), F(0), F(0), F(0)],
+    [F(3), F(-2), F(2), F(1), F(0), F(0), F(0)],
     [F(4), F(-2), F(1), F(-1), F(1), F(0), F(-2)],
     [F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
 ])
@@ -15,6 +15,13 @@ testMatrix2 = np.array([
     [F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
     [F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
     [F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
+])
+
+testMatrix2FirstPhase = np.array([
+    [F(1), F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
+    [F(-1), F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
+    [F(-1), F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
+    [F(-1), F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
 ])
 
 class StructureTests(TestCase):
@@ -89,15 +96,58 @@ class StructureTests(TestCase):
         lp = LinearProgram(testMatrix2)
         lp.addVariable()
         self.assertEqual(lp.nbVariables, 4)
-        expected = np.array([
-            [F(1), F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
-            [F(1), F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
-            [F(1), F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
-            [F(1), F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
-        ])
+        expected = testMatrix2FirstPhase
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
         lp.removeVariable()
         self.assertEqual(lp.nbVariables, 3)
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], testMatrix2[i], "(row %d)" % i)
+
+    def testFirstPhaseLeavingVariable(self):
+        lp = LinearProgram(testMatrix2FirstPhase)
+        self.assertEqual(lp.tableaux[lp.firstPhaseLeavingVariable()][-1], 5)
+
+    def testSolve(self):
+        lp = LinearProgram(testMatrix1)
+        objective = list(lp.tableaux[0])
+        print("objective=", objective)
+        lp.tableaux[0] = [0]*len(lp.tableaux[0])
+        lp.addVariable()
+        row = lp.firstPhaseLeavingVariable()
+        self.assertEqual(row, 2)
+        lp.performPivot(row, 0)
+        expected = np.array([
+            [F(0), F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
+            [F(0), F(5), F(-3), F(2), F(-1), F(1), F(-1), F(8)],
+            [F(1), F(1), F(-1), F(1), F(0), F(0), F(-1), F(10)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+        row, column = 1, 3
+        lp.performPivot(row, column)
+        expected = np.array([
+            [F(0), F(3, 2), F(-1, 2), F(0), F(-1, 2), F(1, 2), F(1, 2), F(-6)],
+            [F(0), F(5, 2), F(-3, 2), F(1), F(-1, 2), F(1, 2), F(-1, 2), F(4)],
+            [F(1), F(-3, 2), F(1, 2), F(0), F(1, 2), F(-1, 2), F(-1, 2), F(6)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+        row, column = 2, 2
+        lp.performPivot(row, column)
+        expected = np.array([
+            [F(1), F(0), F(0), F(0), F(0), F(0), F(0), F(0)],
+            [F(3), F(-2), F(0), F(1), F(1), F(-1), F(-2), F(22)],
+            [F(2), F(-3), F(1), F(0), F(1), F(-1), F(-1), F(12)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+        lp.removeVariable()
+        lp.tableaux[0] = objective
+        print(lp, "\n")
+        lp.updateObjective()
+        print(lp)
+
+    # def testSolve(self):
+    #     lp = LinearProgram(testMatrix1)
+    #     self.assertEqual(lp.solve(), 20)
