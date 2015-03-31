@@ -76,13 +76,17 @@ class LinearProgram:
         self.tableaux[0][0] = Fraction(1)
         self.basicVariables = [None] + [0]*self.nbConstraints
         self.nbVariables += 1
-        # TODO update self.variableFromIndex
+        self.variableFromIndex = {i+1:var for i, var in self.variableFromIndex.items()}
+        self.variableFromIndex[0] = '_phase1_'
+        self.indexFromVariable = {var:i+1 for var, i in self.indexFromVariable.items()}
+        self.indexFromVariable['_phase1_'] = 0
 
     def removeVariable(self):
         self.tableaux = np.delete(self.tableaux, 0, 1)
         self.nbVariables -= 1
         self.basicVariables = [None]+[x-1 for x in self.basicVariables[1:]]
-        # TODO update self.variableFromIndex
+        self.variableFromIndex = {i-1:var for i, var in self.variableFromIndex.items() if i != 0}
+        self.indexFromVariable = {var:i-1 for var, i in self.indexFromVariable.items() if i != 0}
 
     def firstPhaseLeavingVariable(self):
         imin = 1
