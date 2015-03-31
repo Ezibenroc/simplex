@@ -84,3 +84,20 @@ class StructureTests(TestCase):
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
         self.assertEqual(lp.basicVariables[1:], [0, 4, 2])
+
+    def testAddRemoveVariable(self):
+        lp = LinearProgram(testMatrix2)
+        lp.addVariable()
+        self.assertEqual(lp.nbVariables, 4)
+        expected = np.array([
+            [F(1), F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
+            [F(1), F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
+            [F(1), F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
+            [F(1), F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
+        ])
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
+        lp.removeVariable()
+        self.assertEqual(lp.nbVariables, 3)
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(lp.tableaux[i], testMatrix2[i], "(row %d)" % i)
