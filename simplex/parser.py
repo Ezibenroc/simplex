@@ -68,8 +68,9 @@ class Parser:
         self.linearProgram.tableaux = numpy.array([[Fraction(0, 1)]*(self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 1)\
             for i in range(self.linearProgram.nbConstraints + 1)])
         self.linearProgram.basicVariables += list(range(self.linearProgram.nbVariables, self.linearProgram.nbVariables+self.linearProgram.nbConstraints))
-        for v in range(self.linearProgram.nbVariables, self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 1):
+        for v in range(self.linearProgram.nbVariables, self.linearProgram.nbVariables + self.linearProgram.nbConstraints):
             self.linearProgram.variableFromIndex[v] = '_slack_%d' % (v-self.linearProgram.nbVariables)
+            self.linearProgram.indexFromVariable['_slack_%d' % (v-self.linearProgram.nbVariables)] = v
 
     def newExpression(self, lineno, constraintID, content, objective):
         op = self.COMP_EQ_REGEXP.findall(content)
