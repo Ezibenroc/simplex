@@ -31,7 +31,7 @@ class LinearProgram:
     def __str__(self):
         return '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
 
-    def chosePivot(self):
+    def choosePivot(self):
         column = self.tableaux[0][:-1].argmin()
         if column == len(self.tableaux[0]) -1 or self.tableaux[0][column] >= 0:
             raise EndOfAlgorithm
@@ -65,7 +65,7 @@ class LinearProgram:
             print(self, "\n")
         while(True):
             try:
-                row, column = self.chosePivot()
+                row, column = self.choosePivot()
             except EndOfAlgorithm:
                 break
             self.performPivot(row, column, verbose)

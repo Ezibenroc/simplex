@@ -38,22 +38,22 @@ class StructureTests(TestCase):
 
     def testChosePivot(self):
         lp = LinearProgram(testMatrix2)
-        row, column = lp.chosePivot()
+        row, column = lp.choosePivot()
         self.assertEqual(column, 0)
         self.assertEqual(row, 1)
         for i in range(3):
             lp.tableaux[0][i] = F(1)
         with self.assertRaises(EndOfAlgorithm):
-            row, column = lp.chosePivot()
+            row, column = lp.choosePivot()
         lp.tableaux[0][0] = F(-1)
         for i in range(1, 4):
             lp.tableaux[i][0] = F(-1)
         with self.assertRaises(Unbounded):
-            row, column = lp.chosePivot()
+            row, column = lp.choosePivot()
 
     def testPerformPivot(self):
         lp = LinearProgram(testMatrix2)
-        row, column = lp.chosePivot()
+        row, column = lp.choosePivot()
         self.assertEqual((row, column), (1, 0))
         lp.performPivot(row, column)
         expected = np.array([
@@ -65,7 +65,7 @@ class StructureTests(TestCase):
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.tableaux[i], expected[i], "(row %d)" % i)
         self.assertEqual(lp.basicVariables[1:], [0, 4, 5])
-        row, column = lp.chosePivot()
+        row, column = lp.choosePivot()
         self.assertEqual((row, column), (3, 2))
         lp.performPivot(row, column)
         expected = np.array([
