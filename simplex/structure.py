@@ -28,8 +28,41 @@ class LinearProgram:
         self.variableFromIndex = {}
         self.indexFromVariable = {}
 
+    def __repr__(self):
+        return '\n'.join([
+            'nbConstraints: %d' % self.nbConstraints,
+            'nbVariables: %d' % self.nbVariables,
+            'basicVariables: %s' % self.basicVariables,
+            'variableFromIndex: %s' % self.variableFromIndex,
+            'indexFromVariable: %s' % self.indexFromVariable,
+            '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
+        ])
+
+    @staticmethod
+    def fractionToString(f):
+        if f == 1:
+            return '+'
+        elif f == -1:
+            return '-'
+        elif f > 0:
+            return '+%s' % f
+        else:
+            return str(f)
+
+    def entryToString(self, entryID, avoid = None):
+        return ' '.join('%s%s' % (self.fractionToString((-1 if avoid is None or i < len(self.tableaux[0])-1 else 1)*self.tableaux[entryID][i]),
+                            self.variableFromIndex.get(i, ''))
+                        for i in range(len(self.tableaux[0])) if i != avoid and self.tableaux[entryID][i] != 0)
+
     def __str__(self):
-        return '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
+        return '\n'.join([
+            'MAXIMIZE',
+            self.entryToString(0),
+            'SUBJECT TO'
+        ] + [
+            '%s = %s' % (self.variableFromIndex[self.basicVariables[i]],
+                self.entryToString(i, self.basicVariables[i])) for i in range(1, len(self.tableaux))
+        ])
 
     def choosePivot(self):
         column = self.tableaux[0][:-1].argmin()
