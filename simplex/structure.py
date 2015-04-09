@@ -102,13 +102,15 @@ class LinearProgram:
             self.tableaux[0] -= self.tableaux[0][column]*self.tableaux[row]
 
     def solve(self, verbose = False):
+        if verbose:
+            print(self)
         firstPhaseVariable, constantValue = self.firstPhaseLeavingVariable()
         if constantValue < 0:
             objective = list(self.tableaux[0])
             self.tableaux[0] = [0]*len(self.tableaux[0])
             self.addVariable()
             if verbose:
-                print("# FIRST PHASE\n")
+                print("\n\n# FIRST PHASE\n")
             self.performPivot(firstPhaseVariable, 0, verbose)
             if self.runSimplex(verbose) != 0:
                 raise Empty

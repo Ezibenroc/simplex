@@ -1,4 +1,4 @@
-from simplex import LinearProgram, EndOfAlgorithm, Unbounded
+from simplex import LinearProgram, EndOfAlgorithm, Unbounded, Empty
 
 from unittest import TestCase
 import numpy as np
@@ -153,3 +153,26 @@ class StructureTests(TestCase):
         self.assertEqual(lp.solve(), -20)
         lp = LinearProgram(testMatrix2)
         self.assertEqual(lp.solve(), 13)
+
+    def testTrivialEmpty(self):
+        """
+            Maximize 0 st x_0 <= 3 AND x_0 >= 4
+        """
+        lp = LinearProgram(np.array([
+            [F(0), F(0), F(0), F(0)],
+            [F(1), F(1), F(0), F(3)],
+            [F(-1), F(0), F(1), F(-4)]
+        ]))
+        with self.assertRaises(Empty):
+            lp.solve()
+
+    def testTrivialUnbounded(self):
+        """
+            Maximize x_0 st x_0 >= 4
+        """
+        lp = LinearProgram(np.array([
+            [F(-1), F(0), F(0)],
+            [F(-1), F(1),F(-4)]
+        ]))
+        with self.assertRaises(Unbounded):
+            lp.solve()
