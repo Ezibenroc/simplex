@@ -1,4 +1,4 @@
-from simplex import LinearProgram, EndOfAlgorithm, Unbounded, Parser
+from simplex import Simplex, EndOfAlgorithm, Unbounded, Parser
 
 from unittest import TestCase
 import numpy as np
@@ -14,13 +14,13 @@ testMatrix = np.array([
 class StructureTests(TestCase):
 
     def testSimpleParser(self):
-        lp = LinearProgram()
-        parser = Parser(lp, 'example2.in')
+        s = Simplex()
+        parser = Parser(s, 'example2.in')
         parser.parse()
-        self.assertEqual(lp.nbVariables, 3)
-        self.assertEqual(lp.nbConstraints, 3)
-        self.assertEqual(lp.basicVariables[1:], [3, 4, 5])
-        self.assertEqual(lp.variableFromIndex, {
+        self.assertEqual(s.nbVariables, 3)
+        self.assertEqual(s.nbConstraints, 3)
+        self.assertEqual(s.basicVariables[1:], [3, 4, 5])
+        self.assertEqual(s.variableFromIndex, {
             0 : 'x_1',
             1 : 'x_2',
             2 : 'x_3',
@@ -28,7 +28,7 @@ class StructureTests(TestCase):
             4 : '_slack_1',
             5 : '_slack_2',
         })
-        self.assertEqual(lp.indexFromVariable, {
+        self.assertEqual(s.indexFromVariable, {
             'x_1' : 0,
             'x_2' : 1,
             'x_3' : 2,
@@ -37,4 +37,4 @@ class StructureTests(TestCase):
             '_slack_2' : 5,
         })
         for i in range(len(testMatrix)):
-            np.testing.assert_array_equal(lp.tableaux[i], testMatrix[i], "(row %d)" % i)
+            np.testing.assert_array_equal(s.tableaux[i], testMatrix[i], "(row %d)" % i)

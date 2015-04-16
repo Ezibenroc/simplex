@@ -1,4 +1,4 @@
-from .simplex import LinearProgram, EndOfAlgorithm, Unbounded, Empty
+from .simplex import Simplex, EndOfAlgorithm, Unbounded, Empty
 from .parser import Parser
 
-__all__ = ['LinearProgram, EndOfAlgorithm, Unbounded', 'Empty', 'Parser']
+__all__ = ['Simplex, EndOfAlgorithm, Unbounded', 'Empty', 'Parser']

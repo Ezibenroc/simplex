@@ -21,8 +21,8 @@ class Parser:
     COMP_EQ_REGEXP = re.compile('%s|%s|%s' % (LESS, GREATER, EQUAL))
     COMMENT = '//'
 
-    def __init__(self, linearProgram, fileName):
-        self.linearProgram = linearProgram
+    def __init__(self, simplex, fileName):
+        self.simplex = simplex
         self.fileName = fileName
 
     @classmethod
@@ -47,31 +47,31 @@ class Parser:
             elif mode == self.VARIABLES: # variables handled in fillVariables
                 if(self.VAR_REGEXP.findall(content) != [content]):
                     raise Exception('Syntax error at line %s: %s is not a variable.' % (lineno, content))
-                self.linearProgram.nbVariables += 1
-                self.linearProgram.indexFromVariable[content] = varIndex
-                self.linearProgram.variableFromIndex[varIndex] = content
+                self.simplex.nbVariables += 1
+                self.simplex.indexFromVariable[content] = varIndex
+                self.simplex.variableFromIndex[varIndex] = content
                 varIndex += 1
             elif mode == self.SUBJECT_TO:
                 comp = self.COMP_REGEXP.findall(content)
                 if len(comp) > 0:
-                    self.linearProgram.nbConstraints += len(comp)
+                    self.simplex.nbConstraints += len(comp)
                 else:
                     if len(re.findall(self.EQUAL, content)) != 1:
                         raise Exception('Syntax error at line %s: %s is not a valid comparison.' % (lineno, content))
                     else:
-                        self.linearProgram.nbConstraints += 2 # equality translated into two inequalities
+                        self.simplex.nbConstraints += 2 # equality translated into two inequalities
             elif mode == self.BOUNDS:
                 raise Exception('BOUNDS not yet implemented.')
             elif mode in self.OBJECTIVE:
                 continue
             else:
                 raise Exception('Syntax error at line %s.' % lineno)
-        self.linearProgram.tableaux = numpy.array([[Fraction(0, 1)]*(self.linearProgram.nbVariables + self.linearProgram.nbConstraints + 1)\
-            for i in range(self.linearProgram.nbConstraints + 1)])
-        self.linearProgram.basicVariables += list(range(self.linearProgram.nbVariables, self.linearProgram.nbVariables+self.linearProgram.nbConstraints))
-        for v in range(self.linearProgram.nbVariables, self.linearProgram.nbVariables + self.linearProgram.nbConstraints):
-            self.linearProgram.variableFromIndex[v] = '_slack_%d' % (v-self.linearProgram.nbVariables)
-            self.linearProgram.indexFromVariable['_slack_%d' % (v-self.linearProgram.nbVariables)] = v
+        self.simplex.tableaux = numpy.array([[Fraction(0, 1)]*(self.simplex.nbVariables + self.simplex.nbConstraints + 1)\
+            for i in range(self.simplex.nbConstraints + 1)])
+        self.simplex.basicVariables += list(range(self.simplex.nbVariables, self.simplex.nbVariables+self.simplex.nbConstraints))
+        for v in range(self.simplex.nbVariables, self.simplex.nbVariables + self.simplex.nbConstraints):
+            self.simplex.variableFromIndex[v] = '_slack_%d' % (v-self.simplex.nbVariables)
+            self.simplex.indexFromVariable['_slack_%d' % (v-self.simplex.nbVariables)] = v
 
     def newExpression(self, lineno, constraintID, content, objective):
         op = self.COMP_EQ_REGEXP.findall(content)
@@ -86,15 +86,15 @@ class Parser:
             if not bound_match or bound_match.end() != len(bound):
                 raise Exception('Syntax error at line %s: invalid bound.' % lineno)
             bound = Fraction(bound)
-            self.linearProgram.tableaux[constraintID, self.linearProgram.nbVariables+constraintID-1] = 1
+            self.simplex.tableaux[constraintID, self.simplex.nbVariables+constraintID-1] = 1
             if op[0] == self.LESS:
-                self.linearProgram.tableaux[constraintID][-1] = bound
+                self.simplex.tableaux[constraintID][-1] = bound
             elif op[0] == self.GREATER:
-                self.linearProgram.tableaux[constraintID][-1] = -bound
+                self.simplex.tableaux[constraintID][-1] = -bound
             else: # self.EQUAL
-                self.linearProgram.tableaux[constraintID+1, self.linearProgram.nbVariables+constraintID] = 1
-                self.linearProgram.tableaux[constraintID][-1] = bound
-                self.linearProgram.tableaux[constraintID+1, -1] = -bound
+                self.simplex.tableaux[constraintID+1, self.simplex.nbVariables+constraintID] = 1
+                self.simplex.tableaux[constraintID][-1] = bound
+                self.simplex.tableaux[constraintID+1, -1] = -bound
         expression = content[0]
         if expression == "":
             raise Exception('Syntax error at line %s: empty expression.' % lineno)
@@ -114,16 +114,16 @@ class Parser:
                 number = Fraction(number_string)
             variable = literal[number_match.end():].strip()
             try:
-                variable = self.linearProgram.indexFromVariable[variable]
+                variable = self.simplex.indexFromVariable[variable]
             except KeyError:
                 raise Exception('Syntax error at line %s: unknown variable: %s.' % (lineno, variable))
             if len(op) == 0 or op[0] == self.GREATER:
-                self.linearProgram.tableaux[constraintID][variable] = -number
+                self.simplex.tableaux[constraintID][variable] = -number
             elif op[0] == self.LESS:
-                self.linearProgram.tableaux[constraintID][variable] = number
+                self.simplex.tableaux[constraintID][variable] = number
             else: # self.EQUAL
-                self.linearProgram.tableaux[constraintID][variable] = number
-                self.linearProgram.tableaux[constraintID+1, variable] = -number
+                self.simplex.tableaux[constraintID][variable] = number
+                self.simplex.tableaux[constraintID+1, variable] = -number
         return constraintID+2 if op == [self.EQUAL] else constraintID+1
 
     def fillTableaux(self):
@@ -135,7 +135,7 @@ class Parser:
             elif mode == self.VARIABLES: # variables handled in fillVariables
                 continue
             elif mode in self.OBJECTIVE:
-                self.linearProgram.objective = mode
+                self.simplex.objective = mode
                 constraintID = self.newExpression(lineno, constraintID, content, True)
                 mode = None
             elif mode == self.SUBJECT_TO:

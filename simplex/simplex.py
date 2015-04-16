@@ -11,7 +11,7 @@ class Unbounded(Exception):
 class Empty(Exception):
     pass
 
-class LinearProgram:
+class Simplex:
 
     def __init__(self, tableaux = None):
         if not tableaux is None:
