@@ -10,7 +10,10 @@ class Literal:
         return '%s%s' % (self.factor, self.variable)
 
     def __eq__(self, other):
-        return self.factor == other.factor and self.variable == other.variable
+        return self.__dict__ == other.__dict__
+
+    def __hash__(self):
+        return str(self).__hash__()
 
 class Expression:
     """
@@ -26,6 +29,11 @@ class Expression:
         left = "" if self.leftBound is None else "%s <= " % self.leftBound
         right = "" if self.rightBound is None else "<= %s" % self.rightBound
         return "%s%s%s" % (left, " ".join(str(x) for x in self.literalList), right)
+
+    def __eq__(self, other):
+        if self.leftBound != other.leftBound or self.rightBound != other.rightBound:
+            return False
+        return set(self.literalList) == set(other.literalList)
 
 class LinearProgram:
     def __init__(self):

@@ -38,3 +38,37 @@ class ParserTests(TestCase):
         self.assertEqual(expr.literalList, [Literal(1, 'literals')])
         self.assertEqual(expr.leftBound, F(4, 3))
         self.assertEqual(expr.rightBound, F(4, 3))
+
+    def testParse(self):
+        lp = LinearProgram()
+        p = Parser(lp, 'example2.in')
+        p.parse()
+        self.assertEqual(lp.objective, 'MAXIMIZE')
+        self.assertEqual(lp.objectiveFunction[0], Expression(None, None, [
+            Literal(5, 'x_1'),
+            Literal(4, 'x_2'),
+            Literal(3, 'x_3')
+        ]))
+        self.assertEqual(len(lp.subjectTo), 3)
+        subjectTo = [x[0] for x in lp.subjectTo]
+        self.assertIn(Expression(None, 5, [
+            Literal(2, 'x_1'),
+            Literal(3, 'x_2'),
+            Literal(1, 'x_3')
+        ]), subjectTo)
+        self.assertIn(Expression(None, 11, [
+            Literal(4, 'x_1'),
+            Literal(1, 'x_2'),
+            Literal(2, 'x_3')
+        ]), subjectTo)
+        self.assertIn(Expression(None, 8, [
+            Literal(3, 'x_1'),
+            Literal(4, 'x_2'),
+            Literal(2, 'x_3')
+        ]), subjectTo)
+        self.assertEqual(len(lp.bounds), 3)
+        bounds = [x[0] for x in lp.bounds]
+        for v in ['x_1', 'x_2', 'x_3']:
+            self.assertIn(Expression(0, None, [Literal(1, v)]), bounds)
+        self.assertEqual(len(lp.variables), 3)
+        self.assertEqual(set(lp.variables), set(['x_1', 'x_2', 'x_3']))

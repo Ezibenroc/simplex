@@ -117,9 +117,9 @@ class Parser:
             if content in [self.VARIABLES, self.SUBJECT_TO, self.BOUNDS]+[x for x in self.OBJECTIVE]:
                 mode = content
             else:
-                expr = parseLine(content, lineno)
+                expr = self.parseLine(content, lineno)
                 if mode == self.VARIABLES:
-                    if (expr.leftBound, expr.rightBound != None, None or
+                    if ((expr.leftBound, expr.rightBound) != (None, None) or
                             len(expr.literalList) != 1 or
                             expr.literalList[0].factor != 1):
                         raise Exception('Syntax error at line %s.' % lineno)
