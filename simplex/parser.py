@@ -3,8 +3,9 @@ import numpy
 import re
 
 class Parser:
+    SPACES_REGEXP = re.compile('\s')
     OBJECTIVE = ['MINIMIZE', 'MAXIMIZE']
-    SUBJECT_TO = 'SUBJECT TO'
+    SUBJECT_TO = 'SUBJECTTO'
     BOUNDS = 'BOUNDS'
     VARIABLES = 'VARIABLES'
     VAR = '[a-zA-Z][a-zA-Z0-9_]*'
@@ -24,9 +25,9 @@ class Parser:
         self.linearProgram = linearProgram
         self.fileName = fileName
 
-    @staticmethod
-    def removeComment(string):
-        return string.split('//')[0].strip()
+    @classmethod
+    def removeComment(cls, string):
+        return cls.SPACES_REGEXP.sub('', string.split('//')[0])
 
     def lineRange(self):
         lineno = 0
@@ -94,7 +95,7 @@ class Parser:
                 self.linearProgram.tableaux[constraintID+1, self.linearProgram.nbVariables+constraintID] = 1
                 self.linearProgram.tableaux[constraintID][-1] = bound
                 self.linearProgram.tableaux[constraintID+1, -1] = -bound
-        expression = content[0].replace(" ", "")
+        expression = content[0]
         if expression == "":
             raise Exception('Syntax error at line %s: empty expression.' % lineno)
         while expression != "":
