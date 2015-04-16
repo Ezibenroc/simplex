@@ -132,6 +132,10 @@ class Parser:
                     self.linearProgram.objectiveFunction = (expr, lineno)
                     mode = None
                 elif mode == self.SUBJECT_TO:
+                    if (expr.leftBound, expr.rightBound) == (None, None) or len(expr.literalList) == 0:
+                        raise Exception('Syntax error at line %s.' % lineno)
                     self.linearProgram.subjectTo.append((expr, lineno))
                 else:
+                    if (expr.leftBound, expr.rightBound) == (None, None) or len(expr.literalList) != 1 or expr.literalList[0].factor != 1:
+                        raise Exception('Syntax error at line %s.' % lineno)
                     self.linearProgram.bounds.append((expr, lineno))

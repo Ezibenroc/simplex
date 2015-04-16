@@ -41,7 +41,7 @@ class ParserTests(TestCase):
 
     def testParse(self):
         lp = LinearProgram()
-        p = Parser(lp, 'example2.in')
+        p = Parser(lp, 'tests/example2.in')
         p.parse()
         self.assertEqual(lp.objective, 'MAXIMIZE')
         self.assertEqual(lp.objectiveFunction[0], Expression(None, None, [
