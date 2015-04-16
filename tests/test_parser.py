@@ -1,40 +1,17 @@
-from simplex import Simplex, EndOfAlgorithm, Unbounded, Parser
+from simplex import Literal, Expression, LinearProgram, Parser
 
 from unittest import TestCase
 import numpy as np
 from fractions import Fraction as F
 
-testMatrix = np.array([
-    [F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
-    [F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
-    [F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
-    [F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
-])
+class ParserTests(TestCase):
 
-class StructureTests(TestCase):
-
-    def testSimpleParser(self):
-        s = Simplex()
-        parser = Parser(s, 'example2.in')
-        parser.parse()
-        self.assertEqual(s.nbVariables, 3)
-        self.assertEqual(s.nbConstraints, 3)
-        self.assertEqual(s.basicVariables[1:], [3, 4, 5])
-        self.assertEqual(s.variableFromIndex, {
-            0 : 'x_1',
-            1 : 'x_2',
-            2 : 'x_3',
-            3 : '_slack_0',
-            4 : '_slack_1',
-            5 : '_slack_2',
-        })
-        self.assertEqual(s.indexFromVariable, {
-            'x_1' : 0,
-            'x_2' : 1,
-            'x_3' : 2,
-            '_slack_0' : 3,
-            '_slack_1' : 4,
-            '_slack_2' : 5,
-        })
-        for i in range(len(testMatrix)):
-            np.testing.assert_array_equal(s.tableaux[i], testMatrix[i], "(row %d)" % i)
+    def testParseLiteralList(self):
+        p = Parser(None, None)
+        self.assertEqual(p.parseLiteralList('x_5', None), [Literal(1, 'x_5')])
+        l = p.parseLiteralList('2azerty-3/2AzErTy-A_z_E_r_T_y+A_2___151_3a_5_y', None)
+        self.assertEqual(len(l), 4)
+        self.assertIn(Literal(2, 'azerty'), l)
+        self.assertIn(Literal(F(-3, 2), 'AzErTy'), l)
+        self.assertIn(Literal(-1, 'A_z_E_r_T_y'), l)
+        self.assertIn(Literal(1, 'A_2___151_3a_5_y'), l)

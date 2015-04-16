@@ -9,6 +9,9 @@ class Literal:
     def __repr__(self):
         return '%s%s' % (self.factor, self.variable)
 
+    def __eq__(self, other):
+        return self.factor == other.factor and self.variable == other.variable
+
 class Expression:
     """
         Represents an expression: a sum of literals which is between two (or less)
@@ -27,5 +30,7 @@ class Expression:
 class LinearProgram:
     def __init__(self):
         self.objective = None
+        self.objectiveFunction = None
         self.subjectTo = []
         self.bounds = []
+        self.variables = []
