@@ -49,6 +49,9 @@ class Variable:
     def __repr__(self):
         return '(%s: %d, %d)' % (self.name, self.mult, self.add)
 
+    def __eq__(self, other):
+        return self.__dict__ == other.__dict__
+
     def invert(self):
         self.mult = -self.mult
 
@@ -77,3 +80,21 @@ class LinearProgram:
         self.objectiveFunction = self.objectiveFunction[0]
         self.subjectTo = [x[0] for x in self.subjectTo]
         self.bounds = [x[0] for x in self.bounds]
+
+    def mapVariable(self, variableName, function):
+        """
+            Apply the given function to the factor of the given variable, in the
+            objective function and in the constraints. Does not modify the bounds.
+        """
+        for expr in self.subjectTo + [self.objective]:
+            for lit in expr.literalList:
+                if lit.variable == variableName:
+                    lit.factor = function(lit.factor)
+
+    def invertVariable(self, variableName):
+        self.variables[variableName].invert()
+        self.mapVariable(variableName, lambda x: -x)
+
+    def translateVariable(self, variableName, n):
+        self.variables[variableName].translate(n)
+        self.mapVariable(variableName, lambda x: x+n)
