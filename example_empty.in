@@ -7,6 +7,9 @@ SUBJECT TO
 x_1 <= 3
 x_1 >= 4
 
+BOUNDS
+x_1 >= 0
+
 VARIABLES
 // Definition of the variables, for instance:
 x_1

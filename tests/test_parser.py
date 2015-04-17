@@ -1,40 +1,73 @@
-from simplex import LinearProgram, EndOfAlgorithm, Unbounded, Parser
+from simplex import Literal, Expression, Variable, LinearProgram, Parser
 
 from unittest import TestCase
 import numpy as np
 from fractions import Fraction as F
 
-testMatrix = np.array([
-    [F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
-    [F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
-    [F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
-    [F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
-])
+class ParserTests(TestCase):
 
-class StructureTests(TestCase):
+    def testParseLiteralList(self):
+        p = Parser(None, None)
+        self.assertEqual(p.parseLiteralList('x_5', None), [Literal(1, 'x_5')])
+        l = p.parseLiteralList('2azerty-3/2AzErTy-A_z_E_r_T_y+A_2___151_3a_5_y', None)
+        self.assertEqual(len(l), 4)
+        self.assertIn(Literal(2, 'azerty'), l)
+        self.assertIn(Literal(F(-3, 2), 'AzErTy'), l)
+        self.assertIn(Literal(-1, 'A_z_E_r_T_y'), l)
+        self.assertIn(Literal(1, 'A_2___151_3a_5_y'), l)
 
-    def testSimpleParser(self):
+    def testParseLine(self):
+        p = Parser(None, None)
+        expr = p.parseLine('literals<=4/3')
+        self.assertEqual(expr.literalList, [Literal(1, 'literals')])
+        self.assertEqual(expr.leftBound, None)
+        self.assertEqual(expr.rightBound, F(4, 3))
+        expr = p.parseLine('literals>=4/3')
+        self.assertEqual(expr.literalList, [Literal(1, 'literals')])
+        self.assertEqual(expr.leftBound, F(4, 3))
+        self.assertEqual(expr.rightBound, None)
+        expr = p.parseLine('3>=literals>=4/3')
+        self.assertEqual(expr.literalList, [Literal(1, 'literals')])
+        self.assertEqual(expr.leftBound, F(4, 3))
+        self.assertEqual(expr.rightBound, 3)
+        expr = p.parseLine('-3<=literals<=4/3')
+        self.assertEqual(expr.literalList, [Literal(1, 'literals')])
+        self.assertEqual(expr.leftBound, -3)
+        self.assertEqual(expr.rightBound, F(4, 3))
+        expr = p.parseLine('literals=4/3')
+        self.assertEqual(expr.literalList, [Literal(1, 'literals')])
+        self.assertEqual(expr.leftBound, F(4, 3))
+        self.assertEqual(expr.rightBound, F(4, 3))
+
+    def testParse(self):
         lp = LinearProgram()
-        parser = Parser(lp, 'example2.in')
-        parser.parse()
-        self.assertEqual(lp.nbVariables, 3)
-        self.assertEqual(lp.nbConstraints, 3)
-        self.assertEqual(lp.basicVariables[1:], [3, 4, 5])
-        self.assertEqual(lp.variableFromIndex, {
-            0 : 'x_1',
-            1 : 'x_2',
-            2 : 'x_3',
-            3 : '_slack_0',
-            4 : '_slack_1',
-            5 : '_slack_2',
-        })
-        self.assertEqual(lp.indexFromVariable, {
-            'x_1' : 0,
-            'x_2' : 1,
-            'x_3' : 2,
-            '_slack_0' : 3,
-            '_slack_1' : 4,
-            '_slack_2' : 5,
-        })
-        for i in range(len(testMatrix)):
-            np.testing.assert_array_equal(lp.tableaux[i], testMatrix[i], "(row %d)" % i)
+        p = Parser(lp, 'tests/example2.in')
+        p.parse()
+        self.assertEqual(lp.objective, 'MAXIMIZE')
+        self.assertEqual(lp.objectiveFunction, Expression(None, None, [
+            Literal(5, 'x_1'),
+            Literal(4, 'x_2'),
+            Literal(3, 'x_3')
+        ]))
+        self.assertEqual(len(lp.subjectTo), 3)
+        self.assertIn(Expression(None, 5, [
+            Literal(2, 'x_1'),
+            Literal(3, 'x_2'),
+            Literal(1, 'x_3')
+        ]), lp.subjectTo)
+        self.assertIn(Expression(None, 11, [
+            Literal(4, 'x_1'),
+            Literal(1, 'x_2'),
+            Literal(2, 'x_3')
+        ]), lp.subjectTo)
+        self.assertIn(Expression(None, 8, [
+            Literal(3, 'x_1'),
+            Literal(4, 'x_2'),
+            Literal(2, 'x_3')
+        ]), lp.subjectTo)
+        self.assertEqual(len(lp.bounds), 3)
+        for v in ['x_1', 'x_2', 'x_3']:
+            self.assertEqual(lp.variables[v], Variable(v))
+            self.assertIn(Expression(0, None, [Literal(1, v)]), lp.bounds)
+        self.assertEqual(len(lp.variables), 3)
+        self.assertEqual(set(lp.variables), set(['x_1', 'x_2', 'x_3']))

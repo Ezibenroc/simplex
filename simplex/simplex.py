@@ -1,6 +1,5 @@
 from fractions import Fraction
 import numpy as np
-from .parser import Parser
 
 class EndOfAlgorithm(Exception):
     pass
@@ -11,7 +10,7 @@ class Unbounded(Exception):
 class Empty(Exception):
     pass
 
-class LinearProgram:
+class Simplex:
 
     def __init__(self, tableaux = None):
         if not tableaux is None:
