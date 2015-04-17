@@ -42,3 +42,18 @@ class LinearProgram:
         self.subjectTo = []
         self.bounds = []
         self.variables = []
+
+    def check(self):
+        for expr, lineno in self.subjectTo + self.bounds:
+            if (not expr.leftBound is None and not expr.rightBound is None and
+                    expr.leftBound > expr.rightBound):
+                raise Exception('Error at line %s: impossible bounds.' % lineno)
+            for lit in expr.literalList:
+                if not lit.variable in self.variables:
+                    raise Exception('Error at line %s: unknown variable %s.' % (lineno, lit.variable))
+        for lit in self.objectiveFunction[0].literalList:
+            if not lit.variable in self.variables:
+                raise Exception('Error at line %s: unknown variable %s.' % (self.objectiveFunction[1], lit.variable))
+        self.objectiveFunction = self.objectiveFunction[0]
+        self.subjectTo = [x[0] for x in self.subjectTo]
+        self.bounds = [x[0] for x in self.bounds]

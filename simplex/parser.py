@@ -139,3 +139,4 @@ class Parser:
                     if (expr.leftBound, expr.rightBound) == (None, None) or len(expr.literalList) != 1 or expr.literalList[0].factor != 1:
                         raise Exception('Syntax error at line %s.' % lineno)
                     self.linearProgram.bounds.append((expr, lineno))
+        self.linearProgram.check()
