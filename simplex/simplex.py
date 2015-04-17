@@ -1,6 +1,5 @@
 from fractions import Fraction
 import numpy as np
-from .parser import Parser
 
 class EndOfAlgorithm(Exception):
     pass

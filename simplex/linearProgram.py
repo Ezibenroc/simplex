@@ -1,3 +1,7 @@
+from fractions import Fraction
+import numpy
+from .simplex import Simplex
+
 class Literal:
     """
         Represents a literal: a variable (a string) with a factor (a fraction).
@@ -113,7 +117,7 @@ class LinearProgram:
             invert(x_1): x'_1:= -x_1 so x_1=-x'_1
         """
         self.variables[variableName].invert()
-        for expr in self.subjectTo + [self.objective]:
+        for expr in self.subjectTo + [self.objectiveFunction]:
             for lit in expr.literalList:
                 if lit.variable == variableName:
                     lit.factor = -lit.factor
@@ -124,7 +128,7 @@ class LinearProgram:
             translate(x_1, n): x'_1:= x_1+n so x_1=x'_1-n
         """
         self.variables[variableName].translate(n)
-        for expr in self.subjectTo + [self.objective]:
+        for expr in self.subjectTo + [self.objectiveFunction]:
             for lit in expr.literalList:
                 if lit.variable == variableName:
                     expr.constantTerm -= lit.factor*n
@@ -143,3 +147,32 @@ class LinearProgram:
 
     def normalizeConstraints(self):
         self.subjectTo = [subexpr for expr in self.subjectTo for subexpr in expr.normalForm()]
+
+    def initSimplex(self):
+        """
+            Add a simplex attribute corresponding to the linear program.
+        """
+        nbVariables = len(self.variables)
+        nbConstraints = len(self.subjectTo)
+        tableaux = numpy.array([[Fraction(0, 1)]*(nbVariables + nbConstraints + 1)\
+            for i in range(nbConstraints + 1)])
+        variableFromIndex, indexFromVariable = {}, {}
+        for i, var in enumerate(sorted(self.variables)):
+            variableFromIndex[i] = var
+            indexFromVariable[var] = i
+        for v in range(nbVariables, nbVariables + nbConstraints):
+            variableFromIndex[v] = '_slack_%d' % (v-nbVariables)
+            indexFromVariable['_slack_%d' % (v-nbVariables)] = v
+        objFactor = -1 if self.objective == 'MAXIMIZE' else 1
+        for lit in self.objectiveFunction.literalList:
+            tableaux[0][indexFromVariable[lit.variable]] = objFactor*lit.factor
+        tableaux[0][-1] = objFactor*self.objectiveFunction.constantTerm
+        for constraint, expr in enumerate(self.subjectTo):
+            for lit in expr.literalList:
+                tableaux[constraint+1][indexFromVariable[lit.variable]] = lit.factor
+            tableaux[constraint+1][nbVariables+constraint] = Fraction(1)
+            tableaux[constraint+1][-1] = expr.rightBound-expr.constantTerm
+        self.simplex = Simplex(tableaux)
+        self.simplex.basicVariables = [None]+list(range(nbVariables, nbVariables+nbConstraints))
+        self.simplex.variableFromIndex = variableFromIndex
+        self.simplex.indexFromVariable = indexFromVariable
