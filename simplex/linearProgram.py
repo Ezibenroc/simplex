@@ -148,6 +148,10 @@ class LinearProgram:
     def normalizeConstraints(self):
         self.subjectTo = [subexpr for expr in self.subjectTo for subexpr in expr.normalForm()]
 
+    def normalize(self):
+        self.normalizeBounds()
+        self.normalizeConstraints()
+
     def initSimplex(self):
         """
             Add a simplex attribute corresponding to the linear program.

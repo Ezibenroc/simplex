@@ -14,4 +14,5 @@ if __name__ == '__main__':
     lp = LinearProgram()
     parser = Parser(lp, args.inputfile)
     parser.parse()
+    lp.normalize()
     lp.solve()#args.verbose))
