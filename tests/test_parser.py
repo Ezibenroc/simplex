@@ -67,6 +67,7 @@ class ParserTests(TestCase):
         ]), lp.subjectTo)
         self.assertEqual(len(lp.bounds), 3)
         for v in ['x_1', 'x_2', 'x_3']:
+            self.assertIn(v, lp.variables)
             self.assertIn(Expression(0, None, [Literal(1, v)]), lp.bounds)
         self.assertEqual(len(lp.variables), 3)
         self.assertEqual(set(lp.variables), set(['x_1', 'x_2', 'x_3']))

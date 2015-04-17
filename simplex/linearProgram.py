@@ -35,13 +35,33 @@ class Expression:
             return False
         return set(self.literalList) == set(other.literalList)
 
+class Variable:
+    """
+        Represents a variable (given by a string) and the transformations made
+        to it during the normalization (eventual multiplication by -1, eventual
+        addition of some constant).
+    """
+    def __init__(self, name):
+        self.name = name
+        self.mult = 1
+        self.add = 0
+
+    def __repr__(self):
+        return '(%s: %d, %d)' % (self.name, self.mult, self.add)
+
+    def invert(self):
+        self.mult = -self.mult
+
+    def translate(self, n):
+        self.add += n
+
 class LinearProgram:
     def __init__(self):
         self.objective = None
         self.objectiveFunction = None
         self.subjectTo = []
         self.bounds = []
-        self.variables = []
+        self.variables = {}
 
     def check(self):
         for expr, lineno in self.subjectTo + self.bounds:

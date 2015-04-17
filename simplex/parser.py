@@ -1,5 +1,5 @@
 from fractions import Fraction
-from .linearProgram import Literal, Expression, LinearProgram
+from .linearProgram import Literal, Expression, Variable, LinearProgram
 import numpy
 import re
 
@@ -124,7 +124,8 @@ class Parser:
                             expr.literalList[0].factor != 1):
                         raise Exception('Syntax error at line %s.' % lineno)
                     else:
-                        self.linearProgram.variables.append(expr.literalList[0].variable)
+                        var = expr.literalList[0].variable
+                        self.linearProgram.variables[var] = Variable(expr.literalList[0].variable)
                 elif mode in self.OBJECTIVE:
                     if (expr.leftBound, expr.rightBound) != (None, None) or len(expr.literalList) == 0:
                         raise Exception('Syntax error at line %s.' % lineno)
