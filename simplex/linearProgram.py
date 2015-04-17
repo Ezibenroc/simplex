@@ -20,18 +20,20 @@ class Expression:
         Represents an expression: a sum of literals which is between two (or less)
         bounds.
     """
-    def __init__(self, leftBound=None, rightBound=None, literalList=None):
+    def __init__(self, leftBound=None, rightBound=None, literalList=None, constantTerm=0):
         self.leftBound = leftBound
         self.rightBound = rightBound
         self.literalList = literalList
+        self.constantTerm = constantTerm
 
     def __repr__(self):
         left = "" if self.leftBound is None else "%s <= " % self.leftBound
         right = "" if self.rightBound is None else "<= %s" % self.rightBound
-        return "%s%s%s" % (left, " ".join(str(x) for x in self.literalList), right)
+        constant = "" if self.constantTerm == 0 else (" +%s" % self.constantTerm if self.constantTerm > 0 else " %s"%self.constantTerm)
+        return "%s%s%s%s" % (left, " ".join(str(x) for x in self.literalList), constant, right)
 
     def __eq__(self, other):
-        if self.leftBound != other.leftBound or self.rightBound != other.rightBound:
+        if self.leftBound != other.leftBound or self.rightBound != other.rightBound or self.constantTerm != other.constantTerm:
             return False
         return set(self.literalList) == set(other.literalList)
 
@@ -41,10 +43,10 @@ class Variable:
         to it during the normalization (eventual multiplication by -1, eventual
         addition of some constant).
     """
-    def __init__(self, name):
+    def __init__(self, name, mult=1, add=0):
         self.name = name
-        self.mult = 1
-        self.add = 0
+        self.mult = mult
+        self.add = add
 
     def __repr__(self):
         return '(%s: %d, %d)' % (self.name, self.mult, self.add)
@@ -77,24 +79,46 @@ class LinearProgram:
         for lit in self.objectiveFunction[0].literalList:
             if not lit.variable in self.variables:
                 raise Exception('Error at line %s: unknown variable %s.' % (self.objectiveFunction[1], lit.variable))
+        for expr, lineno in self.bounds:
+            if expr.leftBound is None and expr.rightBound is None:
+                raise Exception('Error at line %s: unbounded variable %s.' % (lineno, expr.literalList[0].variable))
+        varBounds = set(expr[0].literalList[0].variable for expr in self.bounds)
+        var = set(self.variables)
+        if varBounds != var:
+                raise Exception('Error at line %s: unbounded variable %s.' % (lineno, (varBounds-var)))
         self.objectiveFunction = self.objectiveFunction[0]
         self.subjectTo = [x[0] for x in self.subjectTo]
         self.bounds = [x[0] for x in self.bounds]
 
-    def mapVariable(self, variableName, function):
+    def invertVariable(self, variableName):
         """
-            Apply the given function to the factor of the given variable, in the
-            objective function and in the constraints. Does not modify the bounds.
+            invert(x_1): x'_1:= -x_1 so x_1=-x'_1
         """
+        self.variables[variableName].invert()
         for expr in self.subjectTo + [self.objective]:
             for lit in expr.literalList:
                 if lit.variable == variableName:
-                    lit.factor = function(lit.factor)
-
-    def invertVariable(self, variableName):
-        self.variables[variableName].invert()
-        self.mapVariable(variableName, lambda x: -x)
+                    lit.factor = -lit.factor
+                    break
 
     def translateVariable(self, variableName, n):
+        """
+            translate(x_1, n): x'_1:= x_1+n so x_1=x'_1-n
+        """
         self.variables[variableName].translate(n)
-        self.mapVariable(variableName, lambda x: x+n)
+        for expr in self.subjectTo + [self.objective]:
+            for lit in expr.literalList:
+                if lit.variable == variableName:
+                    expr.constantTerm -= lit.factor*n
+                    break
+
+    def normalizeBounds(self):
+        for expr in self.bounds:
+            if not expr.rightBound is None and (expr.rightBound <= 0 or expr.leftBound is None):
+                self.invertVariable(expr.literalList[0].variable)
+                expr.leftBound, expr.rightBound = -expr.rightBound, (-expr.leftBound if not expr.leftBound is None else None)
+            if expr.leftBound != 0:
+                self.translateVariable(expr.literalList[0].variable, -expr.leftBound)
+                expr.leftBound, expr.rightBound = 0, (expr.rightBound - expr.leftBound if not expr.rightBound is None else None)
+            if not expr.rightBound is None:
+                self.subjectTo.append(Expression(None, expr.rightBound, expr.literalList))
