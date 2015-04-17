@@ -8,6 +8,11 @@ SUBJECT TO
 4x_1 + x_2 + 2x_3 <= 11
 3x_1 + 4x_2 + 2x_3 <= 8
 
+BOUNDS
+x_1 >= 0
+x_2 >= 0
+x_3 >= 0
+
 VARIABLES
 // Definition of the variables, for instance:
 x_1

@@ -11,14 +11,14 @@ t_2 - t_1 - 17 s_1_2 >= 18
 t_3 - t_1 - 17 s_1_3 >= 18
 t_1 - t_2 - 17 s_2_1 >= 27
 
-// BOUNDS
+BOUNDS
 // Inequalities on the variables, for instance:
-// W >= 0
-// t_1 >= 0
-// t_2 >= 0
-// t_3 >= 0
-// 1 <= p_1 <= 2
-// 1 <= p_2 <= 2
+W >= 0
+t_1 >= 0
+t_2 >= 0
+t_3 >= 0
+1 <= p_1 <= 2
+1 <= p_2 <= 2
 
 VARIABLES
 // Definition of the variables, for instance:

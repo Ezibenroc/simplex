@@ -1,6 +1,6 @@
 from fractions import Fraction
 import numpy
-from .simplex import Simplex
+from .simplex import Simplex, Unbounded, Empty
 
 class Literal:
     """
@@ -176,3 +176,12 @@ class LinearProgram:
         self.simplex.basicVariables = [None]+list(range(nbVariables, nbVariables+nbConstraints))
         self.simplex.variableFromIndex = variableFromIndex
         self.simplex.indexFromVariable = indexFromVariable
+
+    def solve(self):
+        self.initSimplex()
+        try:
+            print("Optimal solution: %d" % self.simplex.solve())
+        except Unbounded:
+            print("No optimal solution (unbounded).")
+        except Empty:
+            print("No optimal solution (empty).")
