@@ -15,6 +15,12 @@ class Literal:
     def __hash__(self):
         return str(self).__hash__()
 
+    def copy(self):
+        return self.__class__(self.factor, self.variable)
+
+    def copyInv(self):
+        return self.__class__(-self.factor, self.variable)
+
 class Expression:
     """
         Represents an expression: a sum of literals which is between two (or less)
@@ -36,6 +42,18 @@ class Expression:
         if self.leftBound != other.leftBound or self.rightBound != other.rightBound or self.constantTerm != other.constantTerm:
             return False
         return set(self.literalList) == set(other.literalList)
+
+    def normalForm(self):
+        """
+            Return a list of equivalent expressions, such that each expression is
+            in canonical form (no left bound).
+        """
+        left, right = None, None
+        if not self.rightBound is None:
+            right = Expression(None, self.rightBound, [lit.copy() for lit in self.literalList], self.constantTerm)
+        if not self.leftBound is None:
+            left = Expression(None, -self.leftBound, [lit.copyInv() for lit in self.literalList], -self.constantTerm)
+        return [x for x in [left, right] if not x is None]
 
 class Variable:
     """
@@ -122,3 +140,6 @@ class LinearProgram:
                 expr.leftBound, expr.rightBound = 0, (expr.rightBound - expr.leftBound if not expr.rightBound is None else None)
             if not expr.rightBound is None:
                 self.subjectTo.append(Expression(None, expr.rightBound, expr.literalList))
+
+    def normalizeConstraints(self):
+        self.subjectTo = [subexpr for expr in self.subjectTo for subexpr in expr.normalForm()]

@@ -14,7 +14,8 @@ def getLP():
     lp.objective = Expression(None, None, [Literal(4, 'x_1'), Literal(-2, 'x_2')])
     lp.subjectTo = [
         Expression(None, 4, [Literal(-2, 'x_1'), Literal(F(-1, 3), 'x_2')]),
-        Expression(F(1, 9), None, [Literal(3, 'x_1'), Literal(1, 'x_2')])
+        Expression(F(1, 9), None, [Literal(3, 'x_1'), Literal(1, 'x_2')]),
+        Expression(F(27, 42), 11, [Literal(1, 'x_1'), Literal(1, 'x_2')])
     ]
     return lp
 
@@ -28,7 +29,8 @@ class LinearProgramTests(TestCase):
         self.assertEqual(lp.objective, Expression(None, None, [Literal(-4, 'x_1'), Literal(-2, 'x_2')], 6))
         self.assertEqual(lp.subjectTo, [
             Expression(None, 4, [Literal(2, 'x_1'), Literal(F(-1, 3), 'x_2')], 1),
-            Expression(F(1, 9), None, [Literal(-3, 'x_1'), Literal(1, 'x_2')], -3)
+            Expression(F(1, 9), None, [Literal(-3, 'x_1'), Literal(1, 'x_2')], -3),
+            Expression(F(27, 42), 11, [Literal(-1, 'x_1'), Literal(1, 'x_2')], -3)
         ])
 
     def testNormalizeBounds(self):
@@ -46,6 +48,17 @@ class LinearProgramTests(TestCase):
         self.assertEqual(lp.subjectTo, [
             Expression(None, 4, [Literal(2, 'x_1'), Literal(F(-1, 3), 'x_2')], F(2, 3)),
             Expression(F(1, 9), None, [Literal(-3, 'x_1'), Literal(1, 'x_2')], 1),
+            Expression(F(27, 42), 11, [Literal(-1, 'x_1'), Literal(1, 'x_2')], 3),
             Expression(None, 2, [Literal(1, 'x_1')]),
             Expression(None, 5, [Literal(1, 'x_2')])
+        ])
+
+    def testNormalizeConstraints(self):
+        lp = getLP()
+        lp.normalizeConstraints()
+        self.assertEqual(lp.subjectTo, [
+            Expression(None, 4, [Literal(-2, 'x_1'), Literal(F(-1, 3), 'x_2')]),
+            Expression(None, F(-1, 9), [Literal(-3, 'x_1'), Literal(-1, 'x_2')]),
+            Expression(None, F(-27, 42), [Literal(-1, 'x_1'), Literal(-1, 'x_2')]),
+            Expression(None, 11, [Literal(1, 'x_1'), Literal(1, 'x_2')])
         ])
