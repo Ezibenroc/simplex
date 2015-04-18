@@ -173,7 +173,7 @@ class LinearProgram:
         objFactor = -1 if self.objective == 'MAXIMIZE' else 1
         for lit in self.objectiveFunction.literalList:
             tableaux[0][indexFromVariable[lit.variable]] = objFactor*lit.factor
-        tableaux[0][-1] = objFactor*self.objectiveFunction.constantTerm
+        tableaux[0][-1] = -objFactor*self.objectiveFunction.constantTerm
         for constraint, expr in enumerate(self.subjectTo):
             for lit in expr.literalList:
                 tableaux[constraint+1][indexFromVariable[lit.variable]] = lit.factor
