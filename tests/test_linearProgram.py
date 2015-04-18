@@ -35,6 +35,20 @@ def getLP2():
     ]
     return lp
 
+def getLP3(): # same as LP2, but x_2 unconstrained
+    lp = LinearProgram()
+    lp.variables = {'x_1': Variable('x_1'), 'x_2': Variable('x_2')}
+    lp.bounds = [
+        Expression(0, None, [Literal(1, 'x_1')]),
+    ]
+    lp.objective = 'MAXIMIZE'
+    lp.objectiveFunction = Expression(None, None, [Literal(4, 'x_1'), Literal(-2, 'x_2')])
+    lp.subjectTo = [
+        Expression(None, 4, [Literal(-2, 'x_1'), Literal(F(-1, 3), 'x_2')]),
+        Expression(0, 5, [Literal(3, 'x_1'), Literal(1, 'x_2')])
+    ]
+    return lp
+
 class LinearProgramTests(TestCase):
 
     def testVariableTransformation(self):
@@ -107,3 +121,21 @@ class LinearProgramTests(TestCase):
         ])
         for i in range(len(expected)):
             np.testing.assert_array_equal(lp.simplex.tableaux[i], expected[i], "(row %d)" % i)
+
+    def testUnconstrained(self):
+        lp = getLP3()
+        lp.pullUnconstrainedVariables()
+        self.assertEqual(len(lp.unconstrained), 1)
+        self.assertIn('x_2', lp.unconstrained)
+        v1, v2 = lp.unconstrained['x_2']
+        self.assertIn(v1, lp.variables)
+        self.assertIn(v2, lp.variables)
+        self.assertNotIn('x_2', lp.variables)
+        self.assertEqual(lp.objectiveFunction, Expression(None, None, [Literal(4, 'x_1'), Literal(-2, v1), Literal(2, v2)]))
+        self.assertEqual(lp.subjectTo, [
+            Expression(None, 4, [Literal(-2, 'x_1'), Literal(F(-1, 3), v1), Literal(F(1, 3), v2)]),
+            Expression(0, 5, [Literal(3, 'x_1'), Literal(1, v1), Literal(-1, v2)])
+        ])
+        sol = {'x_1' : 3, v1 : 0, v2 : 4}
+        lp.pushUnconstrainedVariables(sol)
+        self.assertEqual(sol, {'x_1' : 3, 'x_2' : -4})

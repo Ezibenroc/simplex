@@ -17,8 +17,6 @@ W >= 0
 t_1 >= 0
 t_2 >= 0
 t_3 >= 0
-1 <= p_1 <= 2
-1 <= p_2 <= 2
 
 VARIABLES
 // Definition of the variables, for instance:

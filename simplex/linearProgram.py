@@ -169,12 +169,11 @@ class LinearProgram:
         var = set(self.variables)
         unconstrained = var-varBounds
         self.unconstrained = {}
-        self.unconstrainedReplacement = {}
         for v in unconstrained:
             v1, v2 = self.replaceUnconstrained(v)
             self.unconstrained[v] = v1, v2
 
-    def pushUnconstrainedVariable(self, solution):
+    def pushUnconstrainedVariables(self, solution):
         for var, (v1, v2) in self.unconstrained.items():
             assert(solution[v1] == 0 or solution[v2] == 0)
             self.variables[var] = Variable(var)
@@ -229,7 +228,7 @@ class LinearProgram:
         except Empty:
             print("No optimal solution (empty).")
             return
-        self.pushUnconstrainedVariable(optSol)
+        self.pushUnconstrainedVariables(optSol)
         print("Optimal solution: %d." % opt)
         print("Found with the following affectation of the variables:")
         for var in sorted(optSol):
