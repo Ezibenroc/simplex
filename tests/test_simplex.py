@@ -106,10 +106,11 @@ class StructureTests(TestCase):
 
     def testSolve(self):
         s = Simplex(testMatrix1)
+        s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
         objective = list(s.tableaux[0])
         s.tableaux[0] = [0]*len(s.tableaux[0])
         s.addVariable()
-        row = s.firstPhaseLeavingVariable()
+        row, value = s.firstPhaseLeavingVariable()
         self.assertEqual(row, 2)
         s.performPivot(row, 0)
         expected = np.array([
@@ -148,11 +149,26 @@ class StructureTests(TestCase):
         for i in range(len(expected)):
             np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
 
-    def testSolve(self):
-        s = Simplex(testMatrix1)
-        self.assertEqual(s.solve(), -20)
+    def testSolve2(self):
+        s = Simplex(np.array(testMatrix1))
+        s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
+        opt, optSol = s.solve()
+        self.assertEqual(opt, -20)
+        self.assertEqual(optSol, {
+            '0' : 0,
+            '1' : 12,
+            '2' : 22,
+            '3' : 0
+        })
         s = Simplex(testMatrix2)
-        self.assertEqual(s.solve(), 13)
+        s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
+        opt, optSol = s.solve()
+        self.assertEqual(opt, 13)
+        self.assertEqual(optSol, {
+            '0' : 2,
+            '1' : 0,
+            '2' : 1
+        })
 
     def testTrivialEmpty(self):
         """
@@ -163,6 +179,7 @@ class StructureTests(TestCase):
             [F(1), F(1), F(0), F(3)],
             [F(-1), F(0), F(1), F(-4)]
         ]))
+        s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
         with self.assertRaises(Empty):
             s.solve()
 
@@ -174,5 +191,6 @@ class StructureTests(TestCase):
             [F(-1), F(0), F(0)],
             [F(-1), F(1),F(-4)]
         ]))
+        s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
         with self.assertRaises(Unbounded):
             s.solve()

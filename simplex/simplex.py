@@ -152,4 +152,9 @@ class Simplex:
             self.updateObjective()
         if verbose:
             print("\n\n# SECOND PHASE\n")
-        return self.runSimplex(verbose)
+        opt = self.runSimplex(verbose)
+        optSol = {self.variableFromIndex[varID] : Fraction(0) for varID in range(self.nbVariables)}
+        for constraint in range(1, self.nbConstraints+1):
+            if self.basicVariables[constraint] < self.nbVariables: # not a slack variable
+                optSol[self.variableFromIndex[self.basicVariables[constraint]]] = self.tableaux[constraint][-1]
+        return opt, optSol
