@@ -184,8 +184,9 @@ class LinearProgram:
     def solve(self):
         self.initSimplex()
         try:
-            print("Optimal solution: %d" % self.simplex.solve())
+            opt, optSol = self.simplex.solve()
         except Unbounded:
             print("No optimal solution (unbounded).")
         except Empty:
             print("No optimal solution (empty).")
+        print("Optimal solution: %d" % opt)
