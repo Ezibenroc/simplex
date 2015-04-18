@@ -184,10 +184,10 @@ class LinearProgram:
         self.simplex.variableFromIndex = variableFromIndex
         self.simplex.indexFromVariable = indexFromVariable
 
-    def solve(self):
+    def solve(self, verbose=False):
         self.initSimplex()
         try:
-            opt, optSol = self.simplex.solve()
+            opt, optSol = self.simplex.solve(verbose)
         except Unbounded:
             print("No optimal solution (unbounded).")
             return

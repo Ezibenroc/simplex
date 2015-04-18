@@ -15,4 +15,4 @@ if __name__ == '__main__':
     parser = Parser(lp, args.inputfile)
     parser.parse()
     lp.normalize()
-    lp.solve()#args.verbose))
+    lp.solve(args.verbose)
