@@ -190,8 +190,10 @@ class LinearProgram:
             opt, optSol = self.simplex.solve()
         except Unbounded:
             print("No optimal solution (unbounded).")
+            return
         except Empty:
             print("No optimal solution (empty).")
+            return
         print("Optimal solution: %d." % opt)
         print("Found with the following affectation of the variables:")
         for var in sorted(self.variables):
