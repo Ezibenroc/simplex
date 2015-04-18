@@ -47,6 +47,8 @@ class LinearProgramTests(TestCase):
             Expression(F(1, 9), None, [Literal(-3, 'x_1'), Literal(1, 'x_2')], -3),
             Expression(F(27, 42), 11, [Literal(-1, 'x_1'), Literal(1, 'x_2')], -3)
         ])
+        self.assertEqual(lp.variables['x_1'].computeValue(42), -42)
+        self.assertEqual(lp.variables['x_2'].computeValue(42), 39)
 
     def testNormalizeBounds(self):
         lp = getLP()
@@ -67,6 +69,8 @@ class LinearProgramTests(TestCase):
             Expression(None, 2, [Literal(1, 'x_1')]),
             Expression(None, 5, [Literal(1, 'x_2')])
         ])
+        self.assertEqual(lp.variables['x_1'].computeValue(1), -2)
+        self.assertEqual(lp.variables['x_2'].computeValue(3), 7)
 
     def testNormalizeConstraints(self):
         lp = getLP()
