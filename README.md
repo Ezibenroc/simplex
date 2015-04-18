@@ -1,5 +1,18 @@
 # Simplex
 
+## Get started
+
+```
+./main.py [-h] [-v] inputfile
+```
+
+`-h` displays a short help and exit immediately.
+
+`-v` display the state of the system during the execution of the algorithm.
+
+`inputfile` is the file where is stored the linear program. Please have a look at
+the provided examples to understand the syntax of those files.
+
 
 ## Data structure
 
