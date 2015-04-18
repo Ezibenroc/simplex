@@ -107,10 +107,6 @@ class LinearProgram:
         for expr, lineno in self.bounds:
             if expr.leftBound is None and expr.rightBound is None:
                 raise Exception('Error at line %s: unbounded variable %s.' % (lineno, expr.literalList[0].variable))
-        varBounds = set(expr[0].literalList[0].variable for expr in self.bounds)
-        var = set(self.variables)
-        if varBounds != var:
-                raise Exception('Error at line %s: unbounded variable %s.' % (lineno, (varBounds-var)))
         self.objectiveFunction = self.objectiveFunction[0]
         self.subjectTo = [x[0] for x in self.subjectTo]
         self.bounds = [x[0] for x in self.bounds]
@@ -151,9 +147,48 @@ class LinearProgram:
     def normalizeConstraints(self):
         self.subjectTo = [subexpr for expr in self.subjectTo for subexpr in expr.normalForm()]
 
+    def replaceUnconstrained(self, var):
+        v1 = '_0_'+var
+        v2 = '_1_'+var
+        self.variables.pop(var)
+        self.variables[v1] = Variable(v1)
+        self.variables[v2] = Variable(v2)
+        l = list(filter(lambda lit: lit.variable == var, self.objectiveFunction.literalList))
+        if l: # the variable is in the objective function
+            self.objectiveFunction.literalList = list(filter(lambda lit: lit.variable != var, self.objectiveFunction.literalList))\
+                + [Literal(l[0].factor, v1), Literal(-l[0].factor, v2)]
+        for expr in self.subjectTo:
+            l = list(filter(lambda lit: lit.variable == var, expr.literalList))
+            if l: # the variable is in the objective function
+                expr.literalList = list(filter(lambda lit: lit.variable != var, expr.literalList))\
+                    + [Literal(l[0].factor, v1), Literal(-l[0].factor, v2)]
+        return v1, v2
+
+    def pullUnconstrainedVariables(self):
+        varBounds = set(expr.literalList[0].variable for expr in self.bounds)
+        var = set(self.variables)
+        unconstrained = var-varBounds
+        self.unconstrained = {}
+        self.unconstrainedReplacement = {}
+        for v in unconstrained:
+            v1, v2 = self.replaceUnconstrained(v)
+            self.unconstrained[v] = v1, v2
+
+    def pushUnconstrainedVariable(self, solution):
+        for var, (v1, v2) in self.unconstrained.items():
+            assert(solution[v1] == 0 or solution[v2] == 0)
+            self.variables[var] = Variable(var)
+            if solution[v1] != 0:
+                solution[var] = solution[v1]
+            else:
+                solution[var] = -solution[v2]
+            solution.pop(v1)
+            solution.pop(v2)
+
     def normalize(self):
         self.normalizeBounds()
         self.normalizeConstraints()
+        self.pullUnconstrainedVariables()
 
     def initSimplex(self):
         """
@@ -194,7 +229,8 @@ class LinearProgram:
         except Empty:
             print("No optimal solution (empty).")
             return
+        self.pushUnconstrainedVariable(optSol)
         print("Optimal solution: %d." % opt)
         print("Found with the following affectation of the variables:")
-        for var in sorted(self.variables):
+        for var in sorted(optSol):
             print("%s = %s" % (var, self.variables[var].computeValue(optSol[var])))
