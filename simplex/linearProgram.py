@@ -222,6 +222,8 @@ class LinearProgram:
         self.initSimplex()
         try:
             opt, optSol = self.simplex.solve(verbose)
+            if self.objective == 'MINIMIZE':
+                opt = -opt
         except Unbounded:
             print("No optimal solution (unbounded).")
             return
