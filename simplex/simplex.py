@@ -114,6 +114,15 @@ class Simplex:
         self.indexFromVariable['_phase1_'] = 0
 
     def removeVariable(self):
+        if 0 in self.basicVariables:
+            row = self.basicVariables.index(0)
+            assert self.tableaux[row][-1] == 0
+            column = 1
+            while column < len(self.tableaux[row]) and self.tableaux[row][column] == 0:
+                column += 1
+            assert column < len(self.tableaux[row])
+            print(row, column)
+            self.performPivot(row, column)
         self.tableaux = np.delete(self.tableaux, 0, 1)
         self.nbVariables -= 1
         self.basicVariables = [None]+[x-1 for x in self.basicVariables[1:]]

@@ -104,6 +104,23 @@ class StructureTests(TestCase):
         for i in range(len(expected)):
             np.testing.assert_array_equal(s.tableaux[i], testMatrix2[i], "(row %d)" % i)
 
+    def testRemoveBasicVariable(self):
+        s = Simplex(np.array([
+            [0, -1, -1, 0, 0],
+            [1, -1, +1, 0, 0],
+            [0, -1, -1, 1, 2]
+        ]))
+        s.basicVariables = [None, 0, 3]
+        expected = np.array([
+            [0, -2, 0, 0],
+            [1, -1, 0, 0],
+            [0, -2, 1, 2]
+        ])
+        s.removeVariable()
+        for i in range(len(expected)):
+            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+        self.assertEqual(s.basicVariables[1:], [0, 2])
+
     def testSolve(self):
         s = Simplex(testMatrix1)
         s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
