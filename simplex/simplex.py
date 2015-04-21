@@ -121,7 +121,6 @@ class Simplex:
             while column < len(self.tableaux[row]) and self.tableaux[row][column] == 0:
                 column += 1
             assert column < len(self.tableaux[row])
-            print(row, column)
             self.performPivot(row, column)
         self.tableaux = np.delete(self.tableaux, 0, 1)
         self.nbVariables -= 1
