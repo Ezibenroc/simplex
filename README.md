@@ -3,12 +3,14 @@
 ## Get started
 
 ```
-./main.py [-h] [-v] inputfile
+pypy -OO -m main [-h] [-v] [-t] inputfile
 ```
 
 `-h` displays a short help and exit immediately.
 
-`-v` display the state of the system during the execution of the algorithm.
+`-v` displays the state of the system during the execution of the algorithm.
+
+`-t` displays the time used to perform several steps of the program.
 
 `inputfile` is the file where is stored the linear program. Please have a look at
 the provided examples to understand the syntax of those files.
