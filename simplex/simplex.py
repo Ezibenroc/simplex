@@ -1,4 +1,8 @@
 from fractions import Fraction
+try:
+    import numpypy
+except ImportError:
+    pass
 import numpy as np
 
 class EndOfAlgorithm(Exception):

@@ -1,7 +1,8 @@
 # HELLO, I AM A STUPID AND USELESS MAKEFILE
 
-all:
-	cp -f main.py toto
+toto:
+	@echo pypy -OO -m main $$\* > toto
+	@chmod +x toto
 
-opt:
-	cp -f main.py totoopt
+opt:toto
+	cp -f toto totoopt

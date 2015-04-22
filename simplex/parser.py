@@ -11,7 +11,7 @@ class Parser:
     VARIABLES = 'VARIABLES'
     VAR = '[a-zA-Z][a-zA-Z0-9_]*'
     VAR_REGEXP = re.compile(VAR)
-    NUMBER = '([\+-][ ]*)?(\d+/\d+|\d+)?'
+    NUMBER = '([\+-][ ]*)?(\d+[/.]\d+|\d+)?'
     NUMBER_REGEXP = re.compile(NUMBER)
     LIT = '(?P<factor>%s)( )*(?P<variable>%s)' % (NUMBER, VAR)
     LIT_REGEXP = re.compile(LIT)
