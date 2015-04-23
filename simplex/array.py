@@ -51,3 +51,17 @@ class Array(list):
 
     def __truediv__(self, other):
         return self.scalarOperation(other, lambda a, b: a/b)
+
+    def addColumn(self, element, columnID=0):
+        """
+            Add a whole column made of the given element at the columnID position.
+        """
+        for l in self:
+            l[columnID:columnID] = [element]
+
+    def removeColumn(self, columnID=0):
+        """
+            Remove the whole column.
+        """
+        for l in self:
+            del l[columnID]

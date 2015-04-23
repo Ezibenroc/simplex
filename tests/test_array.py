@@ -27,3 +27,14 @@ class ArrayTests(TestCase):
         self.assertEqual(a, Array([[3, 6], [9, 12]]))
         a/=3
         self.assertEqual(a, Array([[1, 2], [3, 4]]))
+
+    def testAddRemoveColumn(self):
+        a = Array([[F(1), F(2)], [F(3), F(4)]])
+        a.addColumn(F(42), 1)
+        self.assertEqual(a, Array([[1, 42, 2], [3, 42, 4]]))
+        a.removeColumn(2)
+        self.assertEqual(a, Array([[1, 42], [3, 42]]))
+        a.addColumn(4)
+        self.assertEqual(a, Array([[4, 1, 42], [4, 3, 42]]))
+        a.removeColumn()
+        self.assertEqual(a, Array([[1, 42], [3, 42]]))
