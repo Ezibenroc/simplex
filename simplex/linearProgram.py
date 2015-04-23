@@ -231,7 +231,7 @@ class LinearProgram:
             print("No optimal solution (empty).")
             return
         self.pushUnconstrainedVariables(optSol)
-        print("Optimal solution: %d." % opt)
+        print("Optimal solution: %s." % opt)
         print("Found with the following affectation of the variables:")
         for var in sorted(optSol):
             print("%s = %s" % (var, self.variables[var].computeValue(optSol[var])))
