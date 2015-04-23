@@ -1,7 +1,7 @@
+import re
 from fractions import Fraction
 from .linearProgram import Literal, Expression, Variable, LinearProgram
-import numpy
-import re
+from .array import Array
 
 class Parser:
     SPACES_REGEXP = re.compile('\s')

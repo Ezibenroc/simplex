@@ -46,6 +46,9 @@ class Array(list):
     def __mul__(self, other):
         return self.scalarOperation(other, lambda a, b: a*b)
 
+    def __rmul__(self, other):
+        return self.scalarOperation(other, lambda a, b: a*b)
+
     def __itruediv__(self, other):
         return self.inplaceScalarOperation(other, lambda a, b: a/b)
 

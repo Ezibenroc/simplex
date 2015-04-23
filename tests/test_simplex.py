@@ -1,23 +1,22 @@
-from simplex import Simplex, EndOfAlgorithm, Unbounded, Empty
+from simplex import Simplex, EndOfAlgorithm, Unbounded, Empty, Array
 
 from unittest import TestCase
-import numpy as np
 from fractions import Fraction as F
 
-testMatrix1 = np.array([
+testMatrix1 = Array([
     [F(3), F(-2), F(2), F(1), F(0), F(0), F(0)],
     [F(4), F(-2), F(1), F(-1), F(1), F(0), F(-2)],
     [F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
 ])
 
-testMatrix2 = np.array([
+testMatrix2 = Array([
     [F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
     [F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
     [F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
     [F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
 ])
 
-testMatrix2FirstPhase = np.array([
+testMatrix2FirstPhase = Array([
     [F(1), F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
     [F(-1), F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
     [F(-1), F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
@@ -56,40 +55,40 @@ class StructureTests(TestCase):
         row, column = s.choosePivot()
         self.assertEqual((row, column), (1, 0))
         s.performPivot(row, column)
-        expected = np.array([
+        expected = Array([
             [F(0), F(7, 2), F(-1, 2), F(5, 2), F(0), F(0), F(25, 2)],
             [F(1), F(3, 2), F(1, 2), F(1, 2), F(0), F(0), F(5, 2)],
             [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
             [F(0), F(-1, 2), F(1, 2), F(-3, 2), F(0), F(1), F(1, 2)],
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         self.assertEqual(s.basicVariables[1:], [0, 4, 5])
         row, column = s.choosePivot()
         self.assertEqual((row, column), (3, 2))
         s.performPivot(row, column)
-        expected = np.array([
+        expected = Array([
             [F(0), F(3), F(0), F(1), F(0), F(1), F(13)],
             [F(1), F(2), F(0), F(2), F(0), F(-1), F(2)],
             [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
             [F(0), F(-1), F(1), F(-3), F(0), F(2), F(1)],
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         self.assertEqual(s.basicVariables[1:], [0, 4, 2])
 
     def testSimplex(self):
         s = Simplex(testMatrix2)
         obj = s.runSimplex()
         self.assertEqual(obj, 13)
-        expected = np.array([
+        expected = Array([
             [F(0), F(3), F(0), F(1), F(0), F(1), F(13)],
             [F(1), F(2), F(0), F(2), F(0), F(-1), F(2)],
             [F(0), F(-5), F(0), F(-2), F(1), F(0), F(1)],
             [F(0), F(-1), F(1), F(-3), F(0), F(2), F(1)],
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         self.assertEqual(s.basicVariables[1:], [0, 4, 2])
 
     def testAddRemoveVariable(self):
@@ -98,76 +97,76 @@ class StructureTests(TestCase):
         self.assertEqual(s.nbVariables, 4)
         expected = testMatrix2FirstPhase
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         s.removeVariable()
         self.assertEqual(s.nbVariables, 3)
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], testMatrix2[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], testMatrix2[i], "(row %d)" % i)
 
     def testRemoveBasicVariable(self):
-        s = Simplex(np.array([
+        s = Simplex(Array([
             [0, -1, -1, 0, 0],
             [1, -1, +1, 0, 0],
             [0, -1, -1, 1, 2]
         ]))
         s.basicVariables = [None, 0, 3]
-        expected = np.array([
+        expected = Array([
             [0, -2, 0, 0],
             [1, -1, 0, 0],
             [0, -2, 1, 2]
         ])
         s.removeVariable()
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         self.assertEqual(s.basicVariables[1:], [0, 2])
 
     def testSolve(self):
         s = Simplex(testMatrix1)
         s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
-        objective = list(s.tableaux[0])
-        s.tableaux[0] = [0]*len(s.tableaux[0])
+        objective = Array(s.tableaux[0])
+        s.tableaux[0] = Array([0]*len(s.tableaux[0]))
         s.addVariable()
         row, value = s.firstPhaseLeavingVariable()
         self.assertEqual(row, 2)
         s.performPivot(row, 0)
-        expected = np.array([
+        expected = Array([
             [F(0), F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
             [F(0), F(5), F(-3), F(2), F(-1), F(1), F(-1), F(8)],
             [F(1), F(1), F(-1), F(1), F(0), F(0), F(-1), F(10)],
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         row, column = 1, 3
         s.performPivot(row, column)
-        expected = np.array([
+        expected = Array([
             [F(0), F(3, 2), F(-1, 2), F(0), F(-1, 2), F(1, 2), F(1, 2), F(-6)],
             [F(0), F(5, 2), F(-3, 2), F(1), F(-1, 2), F(1, 2), F(-1, 2), F(4)],
             [F(1), F(-3, 2), F(1, 2), F(0), F(1, 2), F(-1, 2), F(-1, 2), F(6)],
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         row, column = 2, 2
         s.performPivot(row, column)
-        expected = np.array([
+        expected = Array([
             [F(1), F(0), F(0), F(0), F(0), F(0), F(0), F(0)],
             [F(3), F(-2), F(0), F(1), F(1), F(-1), F(-2), F(22)],
             [F(2), F(-3), F(1), F(0), F(1), F(-1), F(-1), F(12)],
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         s.removeVariable()
         s.tableaux[0] = objective
         s.updateObjective()
-        expected = np.array([
+        expected = Array([
             [F(1), F(0), F(0), F(1), F(0), F(2), F(-20)],
             [F(-2), F(0), F(1), F(1), F(-1), F(-2), F(22)],
             [F(-3), F(1), F(0), F(1), F(-1), F(-1), F(12)],
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(s.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
 
     def testSolve2(self):
-        s = Simplex(np.array(testMatrix1))
+        s = Simplex(Array(testMatrix1))
         s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
         opt, optSol = s.solve()
         self.assertEqual(opt, -20)
@@ -191,7 +190,7 @@ class StructureTests(TestCase):
         """
             Maximize 0 st x_0 <= 3 AND x_0 >= 4
         """
-        s = Simplex(np.array([
+        s = Simplex(Array([
             [F(0), F(0), F(0), F(0)],
             [F(1), F(1), F(0), F(3)],
             [F(-1), F(0), F(1), F(-4)]
@@ -204,7 +203,7 @@ class StructureTests(TestCase):
         """
             Maximize x_0 st x_0 >= 4
         """
-        s = Simplex(np.array([
+        s = Simplex(Array([
             [F(-1), F(0), F(0)],
             [F(-1), F(1),F(-4)]
         ]))
