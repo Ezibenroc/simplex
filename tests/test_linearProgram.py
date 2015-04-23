@@ -1,7 +1,6 @@
-from simplex import Literal, Expression, Variable, LinearProgram
+from simplex import Literal, Expression, Variable, LinearProgram, Array
 
 from unittest import TestCase
-import numpy as np
 from fractions import Fraction as F
 
 def getLP():
@@ -114,13 +113,13 @@ class LinearProgramTests(TestCase):
             3 : '_slack_1'
         })
         self.assertEqual(lp.simplex.basicVariables[1:], [2, 3])
-        expected = np.array([
+        expected = Array([
             [F(-4), F(2), F(0), F(0), F(0)],
             [F(-2), F(-1, 3), F(1), F(0), F(4)],
             [F(3), F(1), F(0), F(1), F(5)]
         ])
         for i in range(len(expected)):
-            np.testing.assert_array_equal(lp.simplex.tableaux[i], expected[i], "(row %d)" % i)
+            self.assertEqual(lp.simplex.tableaux[i], expected[i], "(row %d)" % i)
 
     def testUnconstrained(self):
         lp = getLP3()

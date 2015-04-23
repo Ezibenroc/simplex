@@ -1,9 +1,7 @@
 from fractions import Fraction
-try:
-    import numpypy
-except ImportError:
-    pass
-import numpy as np
+from .array import Array
+
+argmin = lambda array: min(zip(array, range(len(array))))[1]
 
 class EndOfAlgorithm(Exception):
     pass
@@ -18,7 +16,7 @@ class Simplex:
 
     def __init__(self, tableaux = None):
         if not tableaux is None:
-            self.tableaux = np.array(tableaux)
+            self.tableaux = Array(tableaux)
             self.nbConstraints = len(self.tableaux) - 1
             self.nbVariables = len(self.tableaux[0]) - self.nbConstraints - 1
             self.basicVariables = [None]+list(range(self.nbVariables, self.nbVariables+self.nbConstraints))
@@ -38,7 +36,7 @@ class Simplex:
             'basicVariables: %s' % self.basicVariables,
             'variableFromIndex: %s' % self.variableFromIndex,
             'indexFromVariable: %s' % self.indexFromVariable,
-            '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
+            '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux)
         ])
 
     @staticmethod
@@ -68,12 +66,12 @@ class Simplex:
         ])
 
     def choosePivot(self):
-        column = self.tableaux[0][:-1].argmin()
+        column = argmin(self.tableaux[0][:-1])
         if column == len(self.tableaux[0]) -1 or self.tableaux[0][column] >= 0:
             raise EndOfAlgorithm
         row = None
         for r in range(1, len(self.tableaux)):
-            if self.tableaux[r, column] > 0:
+            if self.tableaux[r][column] > 0:
                 if row is None:
                     row = r
                 elif self.tableaux[r][-1]/self.tableaux[r][column] < self.tableaux[row][-1]/self.tableaux[row][column]:
@@ -108,7 +106,7 @@ class Simplex:
         return self.tableaux[0][-1]
 
     def addVariable(self):
-        self.tableaux = np.hstack(([[Fraction(-1)] for i in range(len(self.tableaux))], self.tableaux))
+        self.tableaux.addColumn(Fraction(-1))
         self.tableaux[0][0] = Fraction(1)
         self.basicVariables = [None]+[x+1 for x in self.basicVariables[1:]]
         self.nbVariables += 1
@@ -126,7 +124,7 @@ class Simplex:
                 column += 1
             assert column < len(self.tableaux[row])
             self.performPivot(row, column)
-        self.tableaux = np.delete(self.tableaux, 0, 1)
+        self.tableaux.removeColumn()
         self.nbVariables -= 1
         self.basicVariables = [None]+[x-1 for x in self.basicVariables[1:]]
         self.variableFromIndex = {i-1:var for i, var in self.variableFromIndex.items() if i != 0}
@@ -151,7 +149,7 @@ class Simplex:
         firstPhaseVariable, constantValue = self.firstPhaseLeavingVariable()
         if constantValue < 0:
             objective = list(self.tableaux[0])
-            self.tableaux[0] = [0]*len(self.tableaux[0])
+            self.tableaux[0] = Array([0]*len(self.tableaux[0]))
             self.addVariable()
             if verbose:
                 print("\n\n# FIRST PHASE\n")

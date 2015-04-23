@@ -1,10 +1,6 @@
 from fractions import Fraction
-try:
-    import numpypy
-except ImportError:
-    pass
-import numpy
 from .simplex import Simplex, Unbounded, Empty
+from .array import Array
 
 class Literal:
     """
@@ -199,7 +195,7 @@ class LinearProgram:
         """
         nbVariables = len(self.variables)
         nbConstraints = len(self.subjectTo)
-        tableaux = numpy.array([[Fraction(0, 1)]*(nbVariables + nbConstraints + 1)\
+        tableaux = Array([[Fraction(0, 1)]*(nbVariables + nbConstraints + 1)\
             for i in range(nbConstraints + 1)])
         variableFromIndex, indexFromVariable = {}, {}
         for i, var in enumerate(sorted(self.variables)):
@@ -235,7 +231,7 @@ class LinearProgram:
             print("No optimal solution (empty).")
             return
         self.pushUnconstrainedVariables(optSol)
-        print("Optimal solution: %d." % opt)
+        print("Optimal solution: %s." % opt)
         print("Found with the following affectation of the variables:")
         for var in sorted(optSol):
             print("%s = %s" % (var, self.variables[var].computeValue(optSol[var])))
