@@ -22,20 +22,20 @@ class Clock:
     def __init__(self):
         self.time = time.time()
         self.start = self.time
-        self.allTimes = {}
+        self.allTimes = []
 
     def tic(self, string):
         assert not string in self.allTimes
         toc = time.time()
-        self.allTimes[string] = toc-self.time
+        self.allTimes.append((string, toc-self.time))
         self.time = toc
 
     def __str__(self):
-        length = max(len('Total'), max(len(x) for x in self.allTimes)) + 1
+        length = max(len('Total'), max(len(x[0]) for x in self.allTimes)) + 1
         toc = time.time()
         string = bcolors.BOLD + bcolors.OKGREEN
-        for s in sorted(self.allTimes):
-            string+= s.ljust(length) + ('%.4fs\n' % self.allTimes[s])
+        for s, t in self.allTimes:
+            string+= s.ljust(length) + ('%.4fs\n' % t)
         return string + 'Total'.ljust(length) + ('%.4fs\n' % (toc-self.start)) + bcolors.ENDC
 
 if __name__ == '__main__':
