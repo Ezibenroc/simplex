@@ -38,7 +38,7 @@ class Simplex:
             'basicVariables: %s' % self.basicVariables,
             'variableFromIndex: %s' % self.variableFromIndex,
             'indexFromVariable: %s' % self.indexFromVariable,
-            '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux.tolist())
+            '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux)
         ])
 
     @staticmethod
