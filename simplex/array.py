@@ -1,5 +1,15 @@
 class Array(list):
 
+    def __init__(self, l):
+        def a(x):
+            if hasattr(x, '__iter__'):
+                return Array([a(y) for y in x])
+            return x
+        if hasattr(l, '__iter__'):
+            self.extend(a(x) for x in l)
+        else:
+            self.append(l)
+
     def inplaceArrayOperation(self, other, f):
         assert(len(self)==len(other))
         for i in range(len(self)):
