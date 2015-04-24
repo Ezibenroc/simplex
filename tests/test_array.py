@@ -73,3 +73,15 @@ class SparseTests(TestCase):
         self.assertEqual(a, SparseLine([4, 1, 42, 3, 4]))
         a.removeColumn()
         self.assertEqual(a, SparseLine([1, 42, 3, 4]))
+
+
+    def testAddRemoveColumnMatrix(self):
+        a = SparseMatrix([[F(1), F(2)], [F(3), F(4)]])
+        a.addColumn(F(42), 1)
+        self.assertEqual(a, SparseMatrix([[1, 42, 2], [3, 42, 4]]))
+        a.removeColumn(2)
+        self.assertEqual(a, SparseMatrix([[1, 42], [3, 42]]))
+        a.addColumn(4)
+        self.assertEqual(a, SparseMatrix([[4, 1, 42], [4, 3, 42]]))
+        a.removeColumn()
+        self.assertEqual(a, SparseMatrix([[1, 42], [3, 42]]))
