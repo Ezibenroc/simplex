@@ -25,7 +25,7 @@ class DenseMatrix(list):
         return self
 
     def scalarOperation(self, scalar, f):
-        return Array(f(self[i], scalar) for i in range(len(self)))
+        return DenseMatrix(f(self[i], scalar) for i in range(len(self)))
 
     def __iadd__(self, other):
         return self.inplaceArrayOperation(other, lambda a, b: a+b)
