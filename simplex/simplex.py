@@ -34,7 +34,7 @@ class Simplex:
             'basicVariables: %s' % self.basicVariables,
             'variableFromIndex: %s' % self.variableFromIndex,
             'indexFromVariable: %s' % self.indexFromVariable,
-            '\n'.join(' '.join(str(y).ljust(6) for y in x) for x in self.tableaux)
+            '\n'.join(' '.join(str(self.tableaux[i][j]).ljust(6) for j in range(len(self.tableaux[i]))) for i in range(len(self.tableaux)))
         ])
 
     @staticmethod
@@ -145,8 +145,8 @@ class Simplex:
             print(self)
         firstPhaseVariable, constantValue = self.firstPhaseLeavingVariable()
         if constantValue < 0:
-            objective = list(self.tableaux[0])
-            self.tableaux[0] = Array([0]*len(self.tableaux[0]))
+            objective = self.tableaux[0].copy()
+            self.tableaux[0] = self.tableaux[0].__class__([0]*len(self.tableaux[0]))
             self.addVariable()
             if verbose:
                 print("\n\n# FIRST PHASE\n")

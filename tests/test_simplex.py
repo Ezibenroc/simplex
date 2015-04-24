@@ -3,25 +3,25 @@ from simplex import Simplex, EndOfAlgorithm, Unbounded, Empty, Array
 from unittest import TestCase
 from fractions import Fraction as F
 
-testMatrix1 = Array([
+testMatrix1 = [
     [F(3), F(-2), F(2), F(1), F(0), F(0), F(0)],
     [F(4), F(-2), F(1), F(-1), F(1), F(0), F(-2)],
     [F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
-])
+]
 
-testMatrix2 = Array([
+testMatrix2 = [
     [F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
     [F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
     [F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
     [F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
-])
+]
 
-testMatrix2FirstPhase = Array([
+testMatrix2FirstPhase = [
     [F(1), F(-5), F(-4), F(-3), F(0), F(0), F(0), F(0)],
     [F(-1), F(2), F(3), F(1), F(1), F(0), F(0), F(5)],
     [F(-1), F(4), F(1), F(2), F(0), F(1), F(0), F(11)],
     [F(-1), F(3), F(4), F(2), F(0), F(0), F(1), F(8)],
-])
+]
 
 class StructureTests(TestCase):
 
@@ -30,10 +30,14 @@ class StructureTests(TestCase):
         self.assertEqual(s.nbConstraints, 2)
         self.assertEqual(s.nbVariables, 4)
         self.assertEqual(s.basicVariables[1:], [4, 5])
+        for i in range(len(testMatrix1)):
+            self.assertEqual(s.tableaux[i], testMatrix1[i])
         s = Simplex(testMatrix2)
         self.assertEqual(s.nbConstraints, 3)
         self.assertEqual(s.nbVariables, 3)
         self.assertEqual(s.basicVariables[1:], [3, 4, 5])
+        for i in range(len(testMatrix2)):
+            self.assertEqual(s.tableaux[i], testMatrix2[i])
 
     def testChosePivot(self):
         s = Simplex(testMatrix2)
@@ -95,7 +99,7 @@ class StructureTests(TestCase):
         s = Simplex(testMatrix2)
         s.addVariable()
         self.assertEqual(s.nbVariables, 4)
-        expected = testMatrix2FirstPhase
+        expected = Array(testMatrix2FirstPhase)
         for i in range(len(expected)):
             self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         s.removeVariable()
@@ -123,8 +127,8 @@ class StructureTests(TestCase):
     def testSolve(self):
         s = Simplex(testMatrix1)
         s.variableFromIndex = {i : str(i) for i in range(s.nbVariables)}
-        objective = Array(s.tableaux[0])
-        s.tableaux[0] = Array([0]*len(s.tableaux[0]))
+        objective = s.tableaux[0].copy()
+        s.tableaux[0] = s.tableaux[0].__class__(([0]*len(s.tableaux[0])))
         s.addVariable()
         row, value = s.firstPhaseLeavingVariable()
         self.assertEqual(row, 2)

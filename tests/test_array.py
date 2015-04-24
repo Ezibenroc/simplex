@@ -53,6 +53,8 @@ class SparseTests(TestCase):
         self.assertEqual(a, [1, 2, 3, 0, 4])
         self.assertEqual(a, {0:1, 1:2, 2:3, 4:4})
         self.assertEqual(len(a), 5)
+        b = SparseLine(a)
+        self.assertEqual(a, b)
 
     def testOperators(self):
         a = SparseLine([F(1), F(2), F(3), F(4)])

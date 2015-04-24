@@ -75,11 +75,18 @@ class DenseMatrix(list):
         sup = sup if sup is not None else len(self)
         return (lambda array: min(zip(array, range(len(array))))[1])(self[inf:sup]) + inf
 
+    def copy(self):
+        return DenseMatrix(self)
+
 class SparseLine(dict):
     def __init__(self, l=[]):
-        for (i, x) in enumerate(l):
-            if x != 0:
-                self[i] = x
+        if isinstance(l, dict):
+            for k, elt in l.items():
+                self[k] = elt
+        else:
+            for (i, x) in enumerate(l):
+                if x != 0:
+                    self[i] = x
         self.__nbitem__ = len(l)
 
     def __getitem__(self, i):
@@ -200,6 +207,9 @@ class SparseLine(dict):
                     minIndex = k
             oldK = k
         return minIndex if m is not None else inf # in case the min is 0
+
+    def copy(self):
+        return SparseLine(self)
 
 class SparseMatrix(list):
     def __init__(self, l):
