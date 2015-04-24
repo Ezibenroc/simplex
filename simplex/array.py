@@ -84,6 +84,12 @@ class SparseLine(dict):
     def __len__(self):
         return self.__nbitem__
 
+    def __eq__(self, other):
+        if isinstance(other, (dict, SparseLine)):
+            return self.items() == other.items()
+        else:
+            return len(self) == len(other) and all(self[i] == other[i] for i in range(len(other)))
+
     def inplaceArrayOperation(self, other, f):
         for k in self.keys()|other.keys():
             elt = f(self[k], other[k])
