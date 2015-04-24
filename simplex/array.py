@@ -155,7 +155,7 @@ class SparseLine(dict):
     def __div__(self, other):
         return self.scalarOperation(other, lambda a, b: a/b)
 
-    def addColumn(self, element, columnID):
+    def addColumn(self, element, columnID=0):
         for k in sorted(self.keys(), key = lambda x:-x):
             if k < columnID:
                 break
@@ -163,7 +163,7 @@ class SparseLine(dict):
             self.pop(k)
         self[columnID] = element
 
-    def removeColumn(self, columnID):
+    def removeColumn(self, columnID=0):
         for k in sorted(self.keys()):
             if k < columnID:
                 continue
