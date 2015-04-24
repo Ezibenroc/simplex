@@ -1,8 +1,6 @@
 from fractions import Fraction
 from .array import Array
 
-argmin = lambda array: min(zip(array, range(len(array))))[1]
-
 class EndOfAlgorithm(Exception):
     pass
 
@@ -66,7 +64,7 @@ class Simplex:
         ])
 
     def choosePivot(self):
-        column = argmin(self.tableaux[0][:-1])
+        column = self.tableaux[0].argmin(0, -1)
         if column == len(self.tableaux[0]) -1 or self.tableaux[0][column] >= 0:
             raise EndOfAlgorithm
         row = None

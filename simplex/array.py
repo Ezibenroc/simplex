@@ -71,6 +71,10 @@ class DenseMatrix(list):
         for l in self:
             del l[columnID]
 
+    def argmin(self, inf=0, sup=None):
+        sup = sup if sup is not None else len(self)
+        return (lambda array: min(zip(array, range(len(array))))[1])(self[inf:sup])
+
 class SparseLine(dict):
     def __init__(self, l=[]):
         for (i, x) in enumerate(l):
@@ -170,6 +174,23 @@ class SparseLine(dict):
             if k > columnID:
                 self[k-1] = self[k]
             self.pop(k)
+
+    def argmin(self, inf=0, sup=None):
+        sup = sup if sup is not None else len(self)
+        if sup == -1:
+            sup = len(self)-1
+        m = None
+        minIndex = None
+        for k in sorted(self.keys()):
+            if k < inf:
+                continue
+            elif k >= sup:
+                break
+            else:
+                if self[k] < m:
+                    m = self.k
+                    minIndex = m
+        return minIndex if m is not None and m <= 0 else inf # in case the min is 0
 
 class SparseMatrix(list):
     def __init__(self, l):
