@@ -90,6 +90,8 @@ class SparseLine(dict):
         self.__nbitem__ = len(l)
 
     def __getitem__(self, i):
+        if i<0:
+            i=len(self)+i
         return self.get(i, 0)
 
     def __len__(self):
@@ -230,5 +232,5 @@ class SparseMatrix(list):
         for l in self:
             l.removeColumn(columnID)
 
-class Array(DenseMatrix):
+class Array(SparseMatrix):
     pass
