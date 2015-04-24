@@ -73,7 +73,7 @@ class DenseMatrix(list):
 
     def argmin(self, inf=0, sup=None):
         sup = sup if sup is not None else len(self)
-        return (lambda array: min(zip(array, range(len(array))))[1])(self[inf:sup])
+        return (lambda array: min(zip(array, range(len(array))))[1])(self[inf:sup]) + inf
 
 class SparseLine(dict):
     def __init__(self, l=[]):
@@ -179,18 +179,27 @@ class SparseLine(dict):
         sup = sup if sup is not None else len(self)
         if sup == -1:
             sup = len(self)-1
-        m = None
-        minIndex = None
-        for k in sorted(self.keys()):
-            if k < inf:
-                continue
-            elif k >= sup:
-                break
+        if inf >= sup:
+            raise Exception('inf is greater than sup, no argmin')
+        m, minIndex = None, None
+        keys = sorted(k for k in self.keys() if k >= inf and k < sup)
+        if len(keys) == 0: # all elts are 0
+            return 0
+        elif keys[0] > inf:
+            m, minIndex = 0, inf
+        elif keys[-1] < sup-1:
+            m, minIndex = 0, sup-1
+        oldK = keys[0]-1
+        for k in keys:
+            if k-oldK > 1 and m > 0:
+                m = 0
+                minIndex = k
             else:
-                if self[k] < m:
-                    m = self.k
-                    minIndex = m
-        return minIndex if m is not None and m <= 0 else inf # in case the min is 0
+                if m is None or self[k] < m:
+                    m = self[k]
+                    minIndex = k
+            oldK = k
+        return minIndex if m is not None else inf # in case the min is 0
 
 class SparseMatrix(list):
     def __init__(self, l):

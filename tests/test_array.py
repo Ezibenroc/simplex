@@ -40,11 +40,19 @@ class DenseTests(TestCase):
         a.removeColumn()
         self.assertEqual(a, DenseMatrix([[1, 42], [3, 42]]))
 
+    def testArgmin(self):
+        a = DenseMatrix([3, 1, 5, 4, 0])
+        self.assertEqual(a.argmin(), len(a)-1)
+        self.assertEqual(a.argmin(0, -1), 1)
+        self.assertEqual(a.argmin(2, -1), 3)
+
 class SparseTests(TestCase):
 
     def testConstructor(self):
-        a = SparseLine([1, 2, 3, 4])
-        self.assertEqual(a, [1, 2, 3, 4])
+        a = SparseLine([1, 2, 3, 0, 4])
+        self.assertEqual(a, [1, 2, 3, 0, 4])
+        self.assertEqual(a, {0:1, 1:2, 2:3, 4:4})
+        self.assertEqual(len(a), 5)
 
     def testOperators(self):
         a = SparseLine([F(1), F(2), F(3), F(4)])
@@ -85,3 +93,15 @@ class SparseTests(TestCase):
         self.assertEqual(a, SparseMatrix([[4, 1, 42], [4, 3, 42]]))
         a.removeColumn()
         self.assertEqual(a, SparseMatrix([[1, 42], [3, 42]]))
+
+    def testArgmin(self):
+        a = SparseLine([3, 1, 5, 4, -1])
+        self.assertEqual(a.argmin(), len(a)-1)
+        a = SparseLine([0, 3, 1, 5, 4])
+        self.assertEqual(a.argmin(), 0)
+        a = SparseLine([0, 3, 0, 5, 4])
+        self.assertEqual(a.argmin(), 0)
+        a = SparseLine([3, 1, 5, 4, 0])
+        self.assertEqual(a.argmin(), len(a)-1)
+        self.assertEqual(a.argmin(0, -1), 1)
+        self.assertEqual(a.argmin(2, -1), 3)
