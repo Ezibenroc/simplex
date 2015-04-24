@@ -1,8 +1,8 @@
-class Array(list):
+class DenseMatrix(list):
     def __init__(self, l):
         def a(x):
             if hasattr(x, '__iter__'):
-                return Array([a(y) for y in x])
+                return DenseMatrix([a(y) for y in x])
             return x
         if hasattr(l, '__iter__'):
             self.extend(a(x) for x in l)
@@ -17,7 +17,7 @@ class Array(list):
 
     def arrayOperation(self, other, f):
         assert(len(self)==len(other))
-        return Array(f(self[i], other[i]) for i in range(len(self)))
+        return DenseMatrix(f(self[i], other[i]) for i in range(len(self)))
 
     def inplaceScalarOperation(self, scalar, f):
         for i in range(len(self)):
@@ -189,3 +189,6 @@ class SparseMatrix(list):
         """
         for l in self:
             l.removeColumn(columnID)
+
+class Array(DenseMatrix):
+    pass
