@@ -89,8 +89,7 @@ class Simplex:
         for r in range(len(self.tableaux)):
             if r != row:
                 coeff = self.tableaux[r][column]
-                for c in range(len(self.tableaux[0])):
-                    self.tableaux[r][c] -= coeff*self.tableaux[row][c]
+                self.tableaux[r] -= coeff*self.tableaux[row]
         if verbose:
             print(self, "\n")
 
