@@ -130,6 +130,13 @@ class StructureTests(TestCase):
         objective = s.tableaux[0].copy()
         s.tableaux[0] = s.tableaux[0].__class__(([0]*len(s.tableaux[0])))
         s.addVariable()
+        expected = Array([
+            [F(1), F(0), F(0), F(0), F(0), F(0), F(0), F(0)],
+            [F(-1), F(4), F(-2), F(1), F(-1), F(1), F(0), F(-2)],
+            [F(-1), F(-1), F(1), F(-1), F(0), F(0), F(1), F(-10)],
+        ])
+        for i in range(len(expected)):
+            self.assertEqual(s.tableaux[i], expected[i], "(row %d)" % i)
         row, value = s.firstPhaseLeavingVariable()
         self.assertEqual(row, 2)
         s.performPivot(row, 0)
