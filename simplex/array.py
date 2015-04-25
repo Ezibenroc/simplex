@@ -175,6 +175,7 @@ class SparseLine(dict):
             self[k+1] = self[k]
             self.pop(k)
         self[columnID] = element
+        self.__nbitem__ += 1
 
     def removeColumn(self, columnID=0):
         for k in sorted(self.keys()):
@@ -183,6 +184,7 @@ class SparseLine(dict):
             if k > columnID:
                 self[k-1] = self[k]
             self.pop(k)
+        self.__nbitem__ -= 1
 
     def argmin(self, inf=0, sup=None):
         sup = sup if sup is not None else len(self)
