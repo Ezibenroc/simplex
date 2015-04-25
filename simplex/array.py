@@ -243,5 +243,5 @@ class SparseMatrix(list):
         for l in self:
             l.removeColumn(columnID)
 
-class Array(SparseMatrix):
+class Array(DenseMatrix):
     pass

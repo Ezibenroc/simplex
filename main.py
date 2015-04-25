@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import argparse
-from simplex import LinearProgram, Parser
+from simplex import LinearProgram, Parser, Array, SparseMatrix, DenseMatrix
 import time
 import sys
 
@@ -46,7 +46,15 @@ if __name__ == '__main__':
             help='Display informations during the solving of the program.')
     parser.add_argument('-t', '--timer', action='store_true',
             help='Display the time needed to complete each task.')
+    parser.add_argument('-m', '--mode', type=str,
+            default='sparse', help='Internal representation (sparse/dense, default=sparse).')
     args = parser.parse_args()
+    if args.mode == 'sparse':
+        Array.__bases__ = (SparseMatrix,)
+    elif args.mode == 'dense':
+        Array.__bases__ = (DenseMatrix,)
+    else:
+        sys.exit('Unknown mode: %s.' % args.mode)
     lp = LinearProgram()
     parser = Parser(lp, args.inputfile)
     clock = Clock()
