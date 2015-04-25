@@ -98,7 +98,7 @@ class SparseLine(dict):
         if i<0:
             i=len(self)+i
         if elt != 0:
-            super().__setitem__(i, elt)
+            super(self.__class__, self).__setitem__(i, elt)
 
     def __len__(self):
         return self.__nbitem__
@@ -113,7 +113,7 @@ class SparseLine(dict):
         return ' | '.join(str(self[k]) for k in range(len(self)))
 
     def inplaceArrayOperation(self, other, f):
-        for k in self.keys()|other.keys():
+        for k in set(self.keys())|set(other.keys()):
             elt = f(self[k], other[k])
             if elt:
                 self[k] = elt
@@ -123,7 +123,7 @@ class SparseLine(dict):
 
     def arrayOperation(self, other, f):
         s = SparseLine()
-        for k in self.keys()|other.keys():
+        for k in set(self.keys())|set(other.keys()):
             elt = f(self[k], other[k])
             if elt:
                 s[k] = elt
