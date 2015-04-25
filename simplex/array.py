@@ -97,7 +97,7 @@ class SparseLine(dict):
     def __setitem__(self, i, elt):
         if i<0:
             i=len(self)+i
-        if elt != 0:
+        if elt:
             super(self.__class__, self).__setitem__(i, elt)
 
     def __len__(self):
@@ -142,9 +142,7 @@ class SparseLine(dict):
     def scalarOperation(self, scalar, f):
         s = SparseLine()
         for k in self.keys():
-            elt = f(self[k], scalar)
-            if elt:
-                s[k] = elt
+            s[k] = f(self[k], scalar)
         return s
 
     def __iadd__(self, other):
