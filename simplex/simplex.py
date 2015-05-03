@@ -19,6 +19,9 @@ class Empty(Exception):
     '''
     pass
 
+def latexWrap(string):
+    return string.replace('_', '\_')
+
 class Simplex:
     '''
         A class to run the simplex algorithm.
@@ -94,7 +97,7 @@ class Simplex:
             raise Unbounded('Variable %d' % column)
         return row, column
 
-    def performPivot(self, row, column, verbose = False):
+    def performPivot(self, row, column, verbose = False, latex=None):
         '''
             Perform a pivot, given the entering and leaving variables.
         '''
@@ -108,14 +111,14 @@ class Simplex:
                 coeff = self.tableaux[r][column]
                 self.tableaux[r] -= coeff*self.tableaux[row]
         if verbose:
-            print(self, "\n")
+            print(self, '\n')
 
-    def runSimplex(self, verbose = False):
+    def runSimplex(self, verbose = False, latex=None):
         '''
             Run the basic simplex (without first phase).
         '''
         if verbose:
-            print(self, "\n")
+            print(self, '\n')
         while(True):
             try:
                 row, column = self.choosePivot()
@@ -174,7 +177,7 @@ class Simplex:
                 continue
             self.tableaux[0] -= self.tableaux[0][column]*self.tableaux[row]
 
-    def solve(self, verbose = False):
+    def solve(self, verbose = False, latex=None):
         '''
             Perform the whole simplex algorithm, first phase included.
         '''
@@ -186,16 +189,20 @@ class Simplex:
             self.tableaux[0] = self.tableaux[0].__class__([0]*len(self.tableaux[0]))
             self.addVariable()
             if verbose:
-                print("\n\n# FIRST PHASE\n")
-            self.performPivot(firstPhaseVariable, 0, verbose)
-            if self.runSimplex(verbose) != 0:
+                print('\n\n# FIRST PHASE\n')
+            if latex:
+                latex.write('\\section*{First phase}\n\n')
+            self.performPivot(firstPhaseVariable, 0, verbose, latex)
+            if self.runSimplex(verbose, latex) != 0:
                 raise Empty
             self.removeVariable()
             for i, col in enumerate(objective):
                 self.tableaux[0][i] = objective[i]
             self.updateObjective()
         if verbose:
-            print("\n\n# SECOND PHASE\n")
+            print('\n\n# SECOND PHASE\n')
+        if latex:
+            latex.write('\\section*{Second phase}\n\n')
         opt = self.runSimplex(verbose)
         optSol = {self.variableFromIndex[varID] : Fraction(0) for varID in range(self.nbVariables)}
         for constraint in range(1, self.nbConstraints+1):

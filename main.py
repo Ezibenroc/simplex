@@ -4,6 +4,22 @@ from simplex import LinearProgram, Parser, Array, SparseMatrix, DenseMatrix
 import time
 import sys
 
+LATEX_HEADER = r'''
+\documentclass[a4paper,11pt]{report}
+\usepackage[utf8]{inputenc}
+\usepackage[english]{babel}
+\usepackage[T1]{fontenc}
+\usepackage[left=1.5cm, right=2cm, top=3cm, bottom=2cm]{geometry}
+\usepackage{amsmath,amsthm,amssymb,array,enumerate,cancel,nth,stmaryrd,fancyhdr,calc,mathtools}
+\parindent=0mm
+\begin{document}
+
+'''
+
+LATEX_FOOTER = r'''
+\end{document}
+'''
+
 class bcolors:
     """
         From http://stackoverflow.com/questions/287871/print-in-terminal-with-colors-using-python
@@ -47,6 +63,8 @@ if __name__ == '__main__':
     parser.add_argument('inputfile')
     parser.add_argument('-v', '--verbose', action='store_true',
             help='Display informations during the solving of the program.')
+    parser.add_argument('-l', '--latex', type=str,
+            default=None, help='Store informations of the solution in the given file.')
     parser.add_argument('-t', '--timer', action='store_true',
             help='Display the time needed to complete each task.')
     parser.add_argument('-m', '--mode', type=str,
@@ -70,7 +88,15 @@ if __name__ == '__main__':
     lp.normalize()
     clock.tic('Normalization')
     # Resolution
-    lp.solve(args.verbose)
+    if args.latex:
+        latex = open(args.latex, 'w')
+        latex.write(LATEX_HEADER)
+    else:
+        latex = None
+    lp.solve(args.verbose, latex)
+    if latex:
+        latex.write(LATEX_FOOTER)
+        latex.close()
     clock.tic('Resolution')
     if args.timer:
         print("\n%s" % clock)

@@ -1,5 +1,5 @@
 from fractions import Fraction
-from .simplex import Simplex, Unbounded, Empty
+from .simplex import Simplex, Unbounded, Empty, latexWrap
 from .array import Array
 
 class Literal:
@@ -37,10 +37,10 @@ class Expression:
         self.constantTerm = constantTerm
 
     def __repr__(self):
-        left = "" if self.leftBound is None else "%s <= " % self.leftBound
-        right = "" if self.rightBound is None else "<= %s" % self.rightBound
-        constant = "" if self.constantTerm == 0 else (" +%s" % self.constantTerm if self.constantTerm > 0 else " %s"%self.constantTerm)
-        return "%s%s%s%s" % (left, " ".join(str(x) for x in self.literalList), constant, right)
+        left = '' if self.leftBound is None else '%s <= ' % self.leftBound
+        right = '' if self.rightBound is None else '<= %s' % self.rightBound
+        constant = '' if self.constantTerm == 0 else (' +%s' % self.constantTerm if self.constantTerm > 0 else ' %s'%self.constantTerm)
+        return '%s%s%s%s' % (left, ' '.join(str(x) for x in self.literalList), constant, right)
 
     def __eq__(self, other):
         if self.leftBound != other.leftBound or self.rightBound != other.rightBound or self.constantTerm != other.constantTerm:
@@ -238,23 +238,30 @@ class LinearProgram:
         self.simplex.variableFromIndex = variableFromIndex
         self.simplex.indexFromVariable = indexFromVariable
 
-    def solve(self, verbose=False):
+    def solve(self, verbose=False, latex=None):
         '''
             Solve the linear program, using the simplex algorithm.
         '''
         self.initSimplex()
         try:
-            opt, optSol = self.simplex.solve(verbose)
+            opt, optSol = self.simplex.solve(verbose, latex)
             if self.objective == 'MINIMIZE':
                 opt = -opt
         except Unbounded:
-            print("No optimal solution (unbounded).")
+            print('No optimal solution (unbounded).')
             return
         except Empty:
-            print("No optimal solution (empty).")
+            print('No optimal solution (empty).')
             return
         self.pushUnconstrainedVariables(optSol)
-        print("Optimal solution: %s." % opt)
-        print("Found with the following affectation of the variables:")
+        print('Optimal solution: %s.' % opt)
+        print('Found with the following affectation of the variables:')
         for var in sorted(optSol):
-            print("%s = %s" % (var, self.variables[var].computeValue(optSol[var])))
+            print('%s = %s' % (var, self.variables[var].computeValue(optSol[var])))
+        if latex:
+            latex.write('Optimal solution: %s.\n\n' % opt)
+            latex.write('Found with the following affectation of the variables:\n\n')
+            latex.write('\\[\\begin{cases}\n')
+            for var in sorted(optSol):
+                latex.write('%s &= %s\\\\\n' % (latexWrap(var), self.variables[var].computeValue(optSol[var])))
+            latex.write('\\end{cases}\\]\n\n')
