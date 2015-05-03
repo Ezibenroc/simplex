@@ -3,16 +3,20 @@
 ## Get started
 
 ```
-pypy -OO -m main [-h] [-v] [-t] [-m MODE] inputfile
+./main.py [-h] [-v] [-l LATEX] [-t] [-m MODE] inputfile
 ```
 
 `-h` displays a short help and exit immediately.
 
 `-v` displays the state of the system during the execution of the algorithm.
 
+`-l LATEX` print the state of the system during the execution of the algorithm in
+    the given file, in latex.
+
 `-t` displays the time used to perform several steps of the program.
 
 `-m MODE` choose the internal representation. `MODE` should be either `sparse` or `dense`.
+    Default is sparse.
 
 `inputfile` is the file where is stored the linear program. Please have a look at
 the provided examples to understand the syntax of those files.
