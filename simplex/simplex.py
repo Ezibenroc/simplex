@@ -22,6 +22,15 @@ class Empty(Exception):
 def latexWrap(string):
     return string.replace('_', '\_')
 
+def fractionToLatex(n):
+    if abs(n.denominator) == 1:
+        if n >= 0:
+            return '+%s' % n
+        else:
+            return str(n)
+    else:
+        return '%s\\frac{%s}{%s}' % (('+' if n>0 else '-'), abs(n.numerator), abs(n.denominator))
+
 class Simplex:
     '''
         A class to run the simplex algorithm.
@@ -64,8 +73,9 @@ class Simplex:
         else:
             return str(f)
 
-    def entryToString(self, entryID, avoid = None, sep = ' '):
-        return sep.join('%s%s' % (self.fractionToString((-1 if avoid is None or i < len(self.tableaux[0])-1 else 1)*self.tableaux[entryID][i]),
+    def entryToString(self, entryID, avoid = None, sep = ' ', fractionPrint=None):
+        fractionPrint = fractionPrint or self.fractionToString
+        return sep.join('%s%s' % (fractionPrint((-1 if avoid is None or i < len(self.tableaux[0])-1 else 1)*self.tableaux[entryID][i]),
                             latexWrap(self.variableFromIndex.get(i, '')))
                         for i in range(len(self.tableaux[0])) if i != avoid and self.tableaux[entryID][i] != 0)
 
@@ -82,11 +92,11 @@ class Simplex:
     def toLatex(self):
         return '\\begin{align*}\n%s\n\\end{align*}\n\n' % ('\n'.join([
             '\\text{Maximize}\\\\',
-            '&%s\\\\' % self.entryToString(0),
+            '&%s\\\\' % self.entryToString(0, fractionPrint=fractionToLatex),
             '\\text{Subject to}\\\\'
         ] + [
             '%s &= %s\\\\' % (latexWrap(self.variableFromIndex[self.basicVariables[i]]),
-                self.entryToString(i, self.basicVariables[i])) for i in range(1, len(self.tableaux))
+                self.entryToString(i, self.basicVariables[i], fractionPrint=fractionToLatex)) for i in range(1, len(self.tableaux))
         ]))
 
     def choosePivot(self):

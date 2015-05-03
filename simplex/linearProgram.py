@@ -1,5 +1,5 @@
 from fractions import Fraction
-from .simplex import Simplex, Unbounded, Empty, latexWrap
+from .simplex import Simplex, Unbounded, Empty, latexWrap, fractionToLatex
 from .array import Array
 
 class Literal:
@@ -267,5 +267,5 @@ class LinearProgram:
             latex.write('Found with the following affectation of the variables:\n\n')
             latex.write('\\[\\begin{cases}\n')
             for var in sorted(optSol):
-                latex.write('%s &= %s\\\\\n' % (latexWrap(var), self.variables[var].computeValue(optSol[var])))
+                latex.write('%s &= %s\\\\\n' % (latexWrap(var), fractionToLatex(self.variables[var].computeValue(optSol[var]))))
             latex.write('\\end{cases}\\]\n\n')
