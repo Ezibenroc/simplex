@@ -65,3 +65,44 @@ of the 0's. Thus, the above matrix would be stored as follows:
 
 It reduces significantly the number of operations to perform on some typical linear
 programs, thus providing better performances.
+
+
+## About performances
+
+The following commands performs a profiling of the program on the file `examples/generated_100.in`.
+
+In dense mode:
+
+```bash
+python -m cProfile -s cumtime main.py -m dense examples/generated_100.in
+```
+
+In sparse mode:
+
+```bash
+python -m cProfile -s cumtime main.py -m sparse examples/generated_100.in
+```
+
+It takes a total of 7.452 seconds to run the program on this example in sparse mode.
+In dense mode, it takes 44.198 seconds. Thus, the sparse representation is a huge
+improvement in some typical examples where there are a lot of 0's in the matrix.
+
+Let us focus on the sparse representation.
+
+We notice that there is a huge bottleneck: 7.214 seconds are spent in the function
+`performPivot` (file `simplex.py`). This represents 97% of the total time.
+
+A deeper analysis (by putting timers in the program) tells us that a great part of this
+time is spent on the following line of this function:
+```python
+self.tableaux[r] -= coeff*self.tableaux[row]
+```
+
+Indeed, this operation is applied on all lines of the matrix for each pivot.
+
+We tried to improve the performances by replacing this operation by a single function
+performing the substraction and the multiplication, instead of the two functions.
+Unfortunately, it increased the execution time.
+
+More research are needed to tackle this problem. A solution could be to code this
+part of the program in C++.
