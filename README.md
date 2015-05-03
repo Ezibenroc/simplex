@@ -21,6 +21,23 @@
 `inputfile` is the file where is stored the linear program. Please have a look at
 the provided examples to understand the syntax of those files.
 
+#### Unit tests
+
+Run the unit tests.
+
+```bash
+./run_test.py
+```
+
+#### Linear program generation
+
+Generate a linear program for a given number of variables. The associated matrix
+is very sparse, due to the constant number of variables in each constraint.
+
+```bash
+./LP_generator.py <number of variables>
+```
+
 
 ## Data structure
 
