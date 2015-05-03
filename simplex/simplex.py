@@ -132,16 +132,12 @@ class Simplex:
         '''
             Run the basic simplex (without first phase).
         '''
-        if verbose:
-            print(self, '\n')
-        if latex:
-            latex.write(self.toLatex())
         while(True):
             try:
                 row, column = self.choosePivot()
             except EndOfAlgorithm:
                 break
-            self.performPivot(row, column, verbose)
+            self.performPivot(row, column, verbose, latex)
         return self.tableaux[0][-1]
 
     def addVariable(self):
@@ -203,14 +199,18 @@ class Simplex:
         if latex:
             latex.write(self.toLatex())
         firstPhaseVariable, constantValue = self.firstPhaseLeavingVariable()
+        if verbose:
+            print('\n\n# FIRST PHASE\n')
+        if latex:
+            latex.write('\\section*{First phase}\n\n')
         if constantValue < 0:
             objective = self.tableaux[0].copy()
             self.tableaux[0] = self.tableaux[0].__class__([0]*len(self.tableaux[0]))
             self.addVariable()
             if verbose:
-                print('\n\n# FIRST PHASE\n')
+                print(self, '\n')
             if latex:
-                latex.write('\\section*{First phase}\n\n')
+                latex.write(self.toLatex())
             self.performPivot(firstPhaseVariable, 0, verbose, latex)
             if self.runSimplex(verbose, latex) != 0:
                 raise Empty
@@ -218,6 +218,12 @@ class Simplex:
             for i, col in enumerate(objective):
                 self.tableaux[0][i] = objective[i]
             self.updateObjective()
+            if verbose:
+                print('Remove the variable and put back the objective function:')
+                print(self, '\n')
+            if latex:
+                latex.write('Remove the variable and put back the objective function:\n')
+                latex.write(self.toLatex())
         if verbose:
             print('\n\n# SECOND PHASE\n')
         if latex:
