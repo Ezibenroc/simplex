@@ -4,6 +4,9 @@ from .linearProgram import Literal, Expression, Variable, LinearProgram
 from .array import Array
 
 class Parser:
+    '''
+        A class to parse a linear program.
+    '''
     SPACES_REGEXP = re.compile('\s')
     OBJECTIVE = ['MINIMIZE', 'MAXIMIZE']
     SUBJECT_TO = 'SUBJECTTO'
@@ -29,9 +32,16 @@ class Parser:
 
     @classmethod
     def removeComment(cls, string):
+        '''
+            Return a string without comments and spaces.
+        '''
         return cls.SPACES_REGEXP.sub('', string.split('//')[0])
 
     def lineRange(self):
+        '''
+            Range over all the lines of the file. Yield the line number, and the
+            line itself.
+        '''
         lineno = 0
         with open(self.fileName) as f:
             for line in f:
@@ -41,6 +51,9 @@ class Parser:
                     yield (lineno, content)
     @staticmethod
     def stringToNumber(n):
+        '''
+            Convert a string into a fraction.
+        '''
         if n in {'+', ''}:
             return Fraction(1)
         elif n == '-':
@@ -50,6 +63,9 @@ class Parser:
 
     @classmethod
     def stringToNumberCheck(cls, n, lineno):
+        '''
+            Check the integrity of the string and return its conversion into a fraction.
+        '''
         m = cls.NUMBER_REGEXP.match(n)
         if m is None or m.end() != len(n):
             raise Exception('Syntax error at line %s.' % lineno)
@@ -57,6 +73,9 @@ class Parser:
 
     @classmethod
     def parseLiteralList(cls, line, lineno=None):
+        '''
+            Return the list of literals represented by the given string.
+        '''
         old = None
         litList = []
         for lit in cls.LIT_REGEXP.finditer(line):
@@ -77,6 +96,9 @@ class Parser:
 
     @classmethod
     def parseLine(cls, line, lineno=None):
+        '''
+            Return the expression represented by the given line.
+        '''
         expr = Expression()
         compList = list(cls.COMP_REGEXP.finditer(line))
         start, end = 0, len(line)
@@ -112,6 +134,9 @@ class Parser:
         return expr
 
     def parse(self):
+        '''
+            Return the linear program represented by the file.
+        '''
         mode = None
         for (lineno, content) in self.lineRange():
             if content in [self.VARIABLES, self.SUBJECT_TO, self.BOUNDS]+[x for x in self.OBJECTIVE]:

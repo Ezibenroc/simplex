@@ -19,6 +19,9 @@ class bcolors:
 
 
 class Clock:
+    '''
+        A class to measure the time spent in some parts of the program.
+    '''
     def __init__(self):
         self.time = time.time()
         self.start = self.time
@@ -55,13 +58,18 @@ if __name__ == '__main__':
         Array.__bases__ = (DenseMatrix,)
     else:
         sys.exit('Unknown mode: %s.' % args.mode)
+    # Instanciation of the linear program
     lp = LinearProgram()
+    # Instanciation of the parser
     parser = Parser(lp, args.inputfile)
     clock = Clock()
+    # Parsing
     parser.parse()
     clock.tic('Parsing')
+    # Normalization
     lp.normalize()
     clock.tic('Normalization')
+    # Resolution
     lp.solve(args.verbose)
     clock.tic('Resolution')
     if args.timer:

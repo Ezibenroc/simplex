@@ -3,9 +3,9 @@ from .simplex import Simplex, Unbounded, Empty
 from .array import Array
 
 class Literal:
-    """
+    '''
         Represents a literal: a variable (a string) with a factor (a fraction).
-    """
+    '''
     def __init__(self, factor, variable):
         self.factor = factor
         self.variable = variable
@@ -26,10 +26,10 @@ class Literal:
         return self.__class__(-self.factor, self.variable)
 
 class Expression:
-    """
+    '''
         Represents an expression: a sum of literals which is between two (or less)
         bounds.
-    """
+    '''
     def __init__(self, leftBound=None, rightBound=None, literalList=None, constantTerm=0):
         self.leftBound = leftBound
         self.rightBound = rightBound
@@ -48,10 +48,10 @@ class Expression:
         return set(self.literalList) == set(other.literalList)
 
     def normalForm(self):
-        """
+        '''
             Return a list of equivalent expressions, such that each expression is
             in canonical form (no left bound).
-        """
+        '''
         left, right = None, None
         if not self.rightBound is None:
             right = Expression(None, self.rightBound, [lit.copy() for lit in self.literalList], self.constantTerm)
@@ -60,11 +60,11 @@ class Expression:
         return [x for x in [left, right] if not x is None]
 
 class Variable:
-    """
+    '''
         Represents a variable (given by a string) and the transformations made
         to it during the normalization (eventual multiplication by -1, eventual
         addition of some constant).
-    """
+    '''
     def __init__(self, name, mult=1, add=0):
         self.name = name
         self.mult = mult
@@ -94,6 +94,9 @@ class LinearProgram:
         self.variables = {}
 
     def check(self):
+        '''
+            Check the integrity of the linear program.
+        '''
         for expr, lineno in self.subjectTo + self.bounds:
             if (not expr.leftBound is None and not expr.rightBound is None and
                     expr.leftBound > expr.rightBound):
@@ -112,9 +115,9 @@ class LinearProgram:
         self.bounds = [x[0] for x in self.bounds]
 
     def invertVariable(self, variableName):
-        """
+        '''
             invert(x_1): x'_1:= -x_1 so x_1=-x'_1
-        """
+        '''
         self.variables[variableName].invert()
         for expr in self.subjectTo + [self.objectiveFunction]:
             for lit in expr.literalList:
@@ -123,9 +126,9 @@ class LinearProgram:
                     break
 
     def translateVariable(self, variableName, n):
-        """
+        '''
             translate(x_1, n): x'_1:= x_1+n so x_1=x'_1-n
-        """
+        '''
         self.variables[variableName].translate(n)
         for expr in self.subjectTo + [self.objectiveFunction]:
             for lit in expr.literalList:
@@ -134,6 +137,9 @@ class LinearProgram:
                     break
 
     def normalizeBounds(self):
+        '''
+            Transform expr>=bound into -expr<=-bound.
+        '''
         for expr in self.bounds:
             if not expr.rightBound is None and (expr.rightBound <= 0 or expr.leftBound is None):
                 self.invertVariable(expr.literalList[0].variable)
@@ -148,6 +154,10 @@ class LinearProgram:
         self.subjectTo = [subexpr for expr in self.subjectTo for subexpr in expr.normalForm()]
 
     def replaceUnconstrained(self, var):
+        '''
+            If x is an unconstrained variable, we replace it by two variables x1
+            and x2 such that x=x1-x2, with constraints x1>=0 and x2>=0.
+        '''
         v1 = '_0_'+var
         v2 = '_1_'+var
         self.variables.pop(var)
@@ -165,6 +175,9 @@ class LinearProgram:
         return v1, v2
 
     def pullUnconstrainedVariables(self):
+        '''
+            Replace all the unconstrained variables.
+        '''
         varBounds = set(expr.literalList[0].variable for expr in self.bounds)
         var = set(self.variables)
         unconstrained = var-varBounds
@@ -174,6 +187,10 @@ class LinearProgram:
             self.unconstrained[v] = v1, v2
 
     def pushUnconstrainedVariables(self, solution):
+        '''
+            Compute the solution of the unconstrained variables, given the solution
+            of their substitute.
+        '''
         for var, (v1, v2) in self.unconstrained.items():
             assert(solution[v1] == 0 or solution[v2] == 0)
             self.variables[var] = Variable(var)
@@ -185,14 +202,17 @@ class LinearProgram:
             solution.pop(v2)
 
     def normalize(self):
+        '''
+            Normalize the linear program.
+        '''
         self.normalizeBounds()
         self.normalizeConstraints()
         self.pullUnconstrainedVariables()
 
     def initSimplex(self):
-        """
+        '''
             Add a simplex attribute corresponding to the linear program.
-        """
+        '''
         nbVariables = len(self.variables)
         nbConstraints = len(self.subjectTo)
         tableaux = Array([[Fraction(0, 1)]*(nbVariables + nbConstraints + 1)\
@@ -219,6 +239,9 @@ class LinearProgram:
         self.simplex.indexFromVariable = indexFromVariable
 
     def solve(self, verbose=False):
+        '''
+            Solve the linear program, using the simplex algorithm.
+        '''
         self.initSimplex()
         try:
             opt, optSol = self.simplex.solve(verbose)

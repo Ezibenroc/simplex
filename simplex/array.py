@@ -1,4 +1,7 @@
 class DenseMatrix(list):
+    '''
+        A class for dense matrix computations.
+    '''
     def __init__(self, l):
         def a(x):
             if hasattr(x, '__iter__'):
@@ -10,21 +13,33 @@ class DenseMatrix(list):
             self.append(l)
 
     def inplaceArrayOperation(self, other, f):
+        '''
+            Perform the operation self[i] = f(self[i], other[i]) for all indices i.
+        '''
         assert(len(self)==len(other))
         for i in range(len(self)):
             self[i] = f(self[i], other[i])
         return self
 
     def arrayOperation(self, other, f):
+        '''
+            Return m such that m[i] = f(self[i], other[i]) for all indices i.
+        '''
         assert(len(self)==len(other))
         return DenseMatrix(f(self[i], other[i]) for i in range(len(self)))
 
     def inplaceScalarOperation(self, scalar, f):
+        '''
+            Perform the operation self[i] = f(self[i], scalar) for all indices i.
+        '''
         for i in range(len(self)):
             self[i] = f(self[i], scalar)
         return self
 
     def scalarOperation(self, scalar, f):
+        '''
+            Return m such that m[i] = f(self[i], scalar) for all indices i.
+        '''
         return DenseMatrix(f(self[i], scalar) for i in range(len(self)))
 
     def __iadd__(self, other):
@@ -58,20 +73,23 @@ class DenseMatrix(list):
         return self.scalarOperation(other, lambda a, b: a/b)
 
     def addColumn(self, element, columnID=0):
-        """
+        '''
             Add a whole column made of the given element at the columnID position.
-        """
+        '''
         for l in self:
             l[columnID:columnID] = [element]
 
     def removeColumn(self, columnID=0):
-        """
+        '''
             Remove the whole column.
-        """
+        '''
         for l in self:
             del l[columnID]
 
     def argmin(self, inf=0, sup=None):
+        '''
+            Return the index of the minimum element.
+        '''
         sup = sup if sup is not None else len(self)
         return (lambda array: min(zip(array, range(len(array))))[1])(self[inf:sup]) + inf
 
@@ -79,6 +97,9 @@ class DenseMatrix(list):
         return DenseMatrix(self)
 
 class SparseLine(dict):
+    '''
+        A class for sparse line computations.
+    '''
     def __init__(self, l=[]):
         if isinstance(l, dict):
             for k, elt in l.items():
@@ -113,6 +134,9 @@ class SparseLine(dict):
         return ' | '.join(str(self[k]) for k in range(len(self)))
 
     def inplaceArrayOperation(self, other, f):
+        '''
+            Perform the operation self[i] = f(self[i], other[i]) for all indices i.
+        '''
         for k in set(self.keys())|set(other.keys()):
             elt = f(self[k], other[k])
             if elt:
@@ -122,6 +146,9 @@ class SparseLine(dict):
         return self
 
     def arrayOperation(self, other, f):
+        '''
+            Return m such that m[i] = f(self[i], other[i]) for all indices i.
+        '''
         s = SparseLine()
         for k in set(self.keys())|set(other.keys()):
             elt = f(self[k], other[k])
@@ -130,6 +157,9 @@ class SparseLine(dict):
         return s
 
     def inplaceScalarOperation(self, scalar, f):
+        '''
+            Perform the operation self[i] = f(self[i], scalar) for all indices i.
+        '''
         l = list(self.items())
         for k, elt in l:
             elt = f(self[k], scalar)
@@ -140,6 +170,9 @@ class SparseLine(dict):
         return self
 
     def scalarOperation(self, scalar, f):
+        '''
+            Return m such that m[i] = f(self[i], scalar) for all indices i.
+        '''
         s = SparseLine()
         for k in self.keys():
             s[k] = f(self[k], scalar)
@@ -176,6 +209,9 @@ class SparseLine(dict):
         return self.scalarOperation(other, lambda a, b: a/b)
 
     def addColumn(self, element, columnID=0):
+        '''
+            Add the given element at the columnID position.
+        '''
         for k in sorted(self.keys(), key = lambda x:-x):
             if k < columnID:
                 break
@@ -185,6 +221,9 @@ class SparseLine(dict):
         self.__nbitem__ += 1
 
     def removeColumn(self, columnID=0):
+        '''
+            Remove the element laying at position columnID.
+        '''
         for k in sorted(self.keys()):
             if k < columnID:
                 continue
@@ -194,6 +233,9 @@ class SparseLine(dict):
         self.__nbitem__ -= 1
 
     def argmin(self, inf=0, sup=None):
+        '''
+            Return the index of the minimum element.
+        '''
         sup = sup if sup is not None else len(self)
         if sup == -1:
             sup = len(self)-1
@@ -223,23 +265,29 @@ class SparseLine(dict):
         return SparseLine(self)
 
 class SparseMatrix(list):
+    '''
+        A class for sparse matrix computations.
+    '''
     def __init__(self, l):
         self.extend(SparseLine(elt) for elt in l)
 
 
     def addColumn(self, element, columnID=0):
-        """
+        '''
             Add a whole column made of the given element at the columnID position.
-        """
+        '''
         for l in self:
             l.addColumn(element, columnID) #[columnID:columnID] = [element]
 
     def removeColumn(self, columnID=0):
-        """
+        '''
             Remove the whole column.
-        """
+        '''
         for l in self:
             l.removeColumn(columnID)
 
 class Array(DenseMatrix):
+    '''
+        Inherits dynamically from one of the two classes DenseMatrix and SparseMatrix.
+    '''
     pass

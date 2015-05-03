@@ -2,15 +2,28 @@ from fractions import Fraction
 from .array import Array
 
 class EndOfAlgorithm(Exception):
+    '''
+        The algorithm stopped on an optimal solution.
+    '''
     pass
 
 class Unbounded(Exception):
+    '''
+        There is no optimal solution (unbounded).
+    '''
     pass
 
 class Empty(Exception):
+    '''
+        There is no optimal solution (empty).
+    '''
     pass
 
 class Simplex:
+    '''
+        A class to run the simplex algorithm.
+        Uses the tableaux representation.
+    '''
 
     def __init__(self, tableaux = None):
         if not tableaux is None:
@@ -64,6 +77,9 @@ class Simplex:
         ])
 
     def choosePivot(self):
+        '''
+            Choose the entering and leaving variables.
+        '''
         column = self.tableaux[0].argmin(0, -1)
         if column == len(self.tableaux[0]) -1 or self.tableaux[0][column] >= 0:
             raise EndOfAlgorithm
@@ -79,6 +95,9 @@ class Simplex:
         return row, column
 
     def performPivot(self, row, column, verbose = False):
+        '''
+            Perform a pivot, given the entering and leaving variables.
+        '''
         if verbose:
             print('Entering variable: %s' % self.variableFromIndex[column])
             print('Leaving variable: %s' % self.variableFromIndex[self.basicVariables[row]])
@@ -92,6 +111,9 @@ class Simplex:
             print(self, "\n")
 
     def runSimplex(self, verbose = False):
+        '''
+            Run the basic simplex (without first phase).
+        '''
         if verbose:
             print(self, "\n")
         while(True):
@@ -103,6 +125,9 @@ class Simplex:
         return self.tableaux[0][-1]
 
     def addVariable(self):
+        '''
+            Add a new variable.
+        '''
         self.tableaux.addColumn(Fraction(-1))
         self.tableaux[0][0] = Fraction(1)
         self.basicVariables = [None]+[x+1 for x in self.basicVariables[1:]]
@@ -113,6 +138,9 @@ class Simplex:
         self.indexFromVariable['_phase1_'] = 0
 
     def removeVariable(self):
+        '''
+            Remove the variable which was added by addVariable.
+        '''
         if 0 in self.basicVariables:
             row = self.basicVariables.index(0)
             assert self.tableaux[row][-1] == 0
@@ -128,6 +156,9 @@ class Simplex:
         self.indexFromVariable = {var:i-1 for var, i in self.indexFromVariable.items() if i != 0}
 
     def firstPhaseLeavingVariable(self):
+        '''
+            Choose the leaving variable of the first phase's first pivot.
+        '''
         imin = 1
         for i in range(2, len(self.tableaux)):
             if self.tableaux[i][-1] < self.tableaux[imin][-1]:
@@ -135,12 +166,18 @@ class Simplex:
         return imin, self.tableaux[imin][-1]
 
     def updateObjective(self):
+        '''
+            Update the objective function after the first phase.
+        '''
         for row, column in enumerate(self.basicVariables):
             if column is None:
                 continue
             self.tableaux[0] -= self.tableaux[0][column]*self.tableaux[row]
 
     def solve(self, verbose = False):
+        '''
+            Perform the whole simplex algorithm, first phase included.
+        '''
         if verbose:
             print(self)
         firstPhaseVariable, constantValue = self.firstPhaseLeavingVariable()
