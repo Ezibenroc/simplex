@@ -1,7 +1,7 @@
 # HELLO, I AM A STUPID AND USELESS MAKEFILE
 
 toto:
-	@echo pypy -OO -m main $$\* > toto
+	@echo ./main.py $$\* > toto
 	@chmod +x toto
 
 opt: toto
