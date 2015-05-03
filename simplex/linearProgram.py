@@ -249,9 +249,13 @@ class LinearProgram:
                 opt = -opt
         except Unbounded:
             print('No optimal solution (unbounded).')
+            if latex:
+                latex.write('No optimal solution (unbounded).\n')
             return
         except Empty:
             print('No optimal solution (empty).')
+            if latex:
+                latex.write('No optimal solution (empty).\n')
             return
         self.pushUnconstrainedVariables(optSol)
         print('Optimal solution: %s.' % opt)
